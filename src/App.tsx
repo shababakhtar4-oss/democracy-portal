@@ -3,13 +3,14 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import BoothLocations from "./pages/BoothLocations";
 import VoterReport from "./pages/VoterReport";
+import VoterList from "./pages/VoterList";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
+import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
@@ -25,7 +26,7 @@ const App = () => (
           <Route path="/booth-locations" element={<BoothLocations />} />
           <Route path="/voter-report" element={<VoterReport />} />
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/list" element={<Index />} />
+          <Route path="/list" element={<VoterList />} />
           <Route path="/language" element={<Index />} />
           <Route path="/recent-logins" element={<Index />} />
           <Route path="/activation-code" element={<Index />} />
