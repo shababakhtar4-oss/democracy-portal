@@ -12,6 +12,7 @@ import VoterList from "./pages/VoterList";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
+import RecentLogins from "./pages/RecentLogins";
 
 const queryClient = new QueryClient();
 
@@ -30,7 +31,7 @@ const App = () => (
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/list" element={<VoterList />} />
           <Route path="/language" element={<Index />} />
-          <Route path="/recent-logins" element={<Index />} />
+          <Route path="/recent-logins" element={<RecentLogins />} />
           <Route path="/activation-code" element={<Index />} />
           <Route path="/booth-committee" element={<Index />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

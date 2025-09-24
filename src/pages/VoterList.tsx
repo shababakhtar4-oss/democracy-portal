@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Printer, Search, Filter, Download, Smartphone, Monitor, Tablet, Clock } from "lucide-react";
+import { Printer, Search, Filter, Download, Monitor, Tablet } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -23,20 +23,6 @@ interface VoterRecord {
   isPrint: boolean;
 }
 
-interface RecentLogin {
-  id: number;
-  device: string;
-  timestamp: string;
-  ipAddress: string;
-  location: string;
-}
-
-// Mock recent logins data
-const recentLogins: RecentLogin[] = [
-  { id: 1, device: 'Samsung Galaxy S22 - Chrome Mobile', timestamp: '2 hours ago', ipAddress: '192.168.1.15', location: 'Mumbai, India' },
-  { id: 2, device: 'Windows PC - Chrome Desktop', timestamp: '1 day ago', ipAddress: '192.168.1.25', location: 'Mumbai, India' },
-  { id: 3, device: 'iPad Pro - Safari', timestamp: '3 days ago', ipAddress: '192.168.1.35', location: 'Mumbai, India' },
-];
 
 const mockVoterData: VoterRecord[] = [
   {
@@ -165,13 +151,6 @@ const VoterList = () => {
     }
   };
 
-  const getDeviceIcon = (type: string) => {
-    switch (type) {
-      case 'mobile': return <Smartphone className="h-4 w-4" />;
-      case 'tablet': return <Tablet className="h-4 w-4" />;
-      default: return <Monitor className="h-4 w-4" />;
-    }
-  };
 
   return (
     <DetailPageLayout title="Voter Records">
@@ -305,43 +284,6 @@ const VoterList = () => {
             </CardContent>
           </Card>
 
-          {/* Recent Logins Section */}
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                Recent Logins
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {recentLogins.map((login, index) => (
-                  <div key={login.id}>
-                    <div className="flex items-start gap-3">
-                      <div className="text-civic-primary mt-1">
-                        <Smartphone className="h-4 w-4" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-medium text-sm">{login.device}</h4>
-                          <span className="text-xs text-muted-foreground">
-                            {login.timestamp}
-                          </span>
-                        </div>
-                        <div className="text-muted-foreground text-xs mt-1 space-y-0.5">
-                          <p>IP: {login.ipAddress}</p>
-                          <p>Location: {login.location}</p>
-                        </div>
-                      </div>
-                    </div>
-                    {index < recentLogins.length - 1 && (
-                      <Separator className="mt-3" />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Voter Records List */}
