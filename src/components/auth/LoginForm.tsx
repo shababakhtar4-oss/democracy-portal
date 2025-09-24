@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Vote } from "lucide-react";
+import { Eye, EyeOff, Vote, UserPlus } from "lucide-react";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -128,6 +128,19 @@ const LoginForm = () => {
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
+          
+          <div className="mt-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              Don't have an account?{" "}
+              <Link 
+                to="/signup" 
+                className="font-medium text-civic-primary hover:text-civic-primary/80 transition-colors duration-200 inline-flex items-center gap-1"
+              >
+                <UserPlus className="h-4 w-4" />
+                Create Account
+              </Link>
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>

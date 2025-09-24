@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, Printer, Smartphone, Monitor, Tablet } from 'lucide-react';
+import { Printer, Search, Filter, Download, Smartphone, Monitor, Tablet, Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -23,12 +23,20 @@ interface VoterRecord {
   isPrint: boolean;
 }
 
-interface RecentDevice {
-  id: string;
-  name: string;
-  type: 'mobile' | 'desktop' | 'tablet';
+interface RecentLogin {
+  id: number;
+  device: string;
   timestamp: string;
+  ipAddress: string;
+  location: string;
 }
+
+// Mock recent logins data
+const recentLogins: RecentLogin[] = [
+  { id: 1, device: 'Samsung Galaxy S22 - Chrome Mobile', timestamp: '2 hours ago', ipAddress: '192.168.1.15', location: 'Mumbai, India' },
+  { id: 2, device: 'Windows PC - Chrome Desktop', timestamp: '1 day ago', ipAddress: '192.168.1.25', location: 'Mumbai, India' },
+  { id: 3, device: 'iPad Pro - Safari', timestamp: '3 days ago', ipAddress: '192.168.1.35', location: 'Mumbai, India' },
+];
 
 const mockVoterData: VoterRecord[] = [
   {
@@ -87,13 +95,6 @@ const mockVoterData: VoterRecord[] = [
     relatedTo: 'ramesh singh',
     isPrint: true
   }
-];
-
-const recentDevices: RecentDevice[] = [
-  { id: '1', name: 'iPhone 14', type: 'mobile', timestamp: '22 Sept, 10:30 AM' },
-  { id: '2', name: 'Samsung Galaxy S22', type: 'mobile', timestamp: '21 Sept, 9:00 PM' },
-  { id: '3', name: 'Chrome on Windows', type: 'desktop', timestamp: '20 Sept, 11:45 AM' },
-  { id: '4', name: 'iPad Pro', type: 'tablet', timestamp: '19 Sept, 3:15 PM' }
 ];
 
 const VoterList = () => {
@@ -304,28 +305,38 @@ const VoterList = () => {
             </CardContent>
           </Card>
 
-          {/* Recent Devices Section */}
+          {/* Recent Logins Section */}
           <Card className="mt-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Smartphone className="h-5 w-5" />
-                Recent Devices
+                <Clock className="h-5 w-5" />
+                Recent Logins
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {recentDevices.map((device, index) => (
-                  <div key={device.id}>
+                {recentLogins.map((login, index) => (
+                  <div key={login.id}>
                     <div className="flex items-start gap-3">
                       <div className="text-civic-primary mt-1">
-                        {getDeviceIcon(device.type)}
+                        <Smartphone className="h-4 w-4" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground">{device.name}</p>
-                        <p className="text-xs text-muted-foreground">{device.timestamp}</p>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium text-sm">{login.device}</h4>
+                          <span className="text-xs text-muted-foreground">
+                            {login.timestamp}
+                          </span>
+                        </div>
+                        <div className="text-muted-foreground text-xs mt-1 space-y-0.5">
+                          <p>IP: {login.ipAddress}</p>
+                          <p>Location: {login.location}</p>
+                        </div>
                       </div>
                     </div>
-                    {index < recentDevices.length - 1 && <Separator className="mt-3" />}
+                    {index < recentLogins.length - 1 && (
+                      <Separator className="mt-3" />
+                    )}
                   </div>
                 ))}
               </div>

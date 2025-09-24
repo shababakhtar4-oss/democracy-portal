@@ -10,7 +10,7 @@ import {
   Key, 
   Users 
 } from "lucide-react";
-import Header from "@/components/layout/Header";
+import EnhancedHeader from "@/components/layout/EnhancedHeader";
 import DashboardTile from "@/components/dashboard/DashboardTile";
 
 interface User {
@@ -94,7 +94,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header user={user} />
+      <EnhancedHeader user={user} />
       
       <main className="container mx-auto px-6 py-8">
         <div className="mb-6">
