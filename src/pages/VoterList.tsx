@@ -120,9 +120,9 @@ const VoterList = () => {
       if (filters.name && !voter.name.toLowerCase().includes(filters.name.toLowerCase())) return false;
       if (filters.ageMin && voter.age < parseInt(filters.ageMin)) return false;
       if (filters.ageMax && voter.age > parseInt(filters.ageMax)) return false;
-      if (filters.gender && voter.gender !== filters.gender) return false;
+      if (filters.gender && filters.gender !== 'all' && voter.gender !== filters.gender) return false;
       if (filters.boothNo && voter.boothNo !== parseInt(filters.boothNo)) return false;
-      if (filters.city && voter.city !== filters.city) return false;
+      if (filters.city && filters.city !== 'all' && voter.city !== filters.city) return false;
       if (filters.houseNo && !voter.houseNo.toLowerCase().includes(filters.houseNo.toLowerCase())) return false;
       if (filters.relatedTo && !voter.relatedTo.toLowerCase().includes(filters.relatedTo.toLowerCase())) return false;
       if (filters.mobileAvailable && !voter.mobile) return false;
@@ -222,7 +222,7 @@ const VoterList = () => {
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
                     <SelectItem value="Male">Male</SelectItem>
                     <SelectItem value="Female">Female</SelectItem>
                   </SelectContent>
@@ -246,7 +246,7 @@ const VoterList = () => {
                     <SelectValue placeholder="Select city" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Cities</SelectItem>
+                    <SelectItem value="all">All Cities</SelectItem>
                     {cities.map(city => (
                       <SelectItem key={city} value={city}>{city}</SelectItem>
                     ))}
