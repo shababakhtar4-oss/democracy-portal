@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import DetailPageLayout from "@/components/layout/DetailPageLayout";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 
 interface VoterRecord {
   id: string;
@@ -80,8 +81,61 @@ const mockVoterData: VoterRecord[] = [
     city: 'DELHI',
     relatedTo: 'ramesh singh',
     isPrint: true
+  },
+    {
+    id: '5',
+    name: 'radha',
+    age: 45,
+    gender: 'Female',
+    voterIdNumber: 'DLH9876543',
+    boothAddress: 'COMMUNITY CENTER, JANAKPURI, NEW DELHI-110058',
+    boothNo: 104,
+    mobile: '9988776655',
+    houseNo: 'C-789',
+    city: 'DELHI',
+    relatedTo: 'ramesh singh',
+    isPrint: true
+  },
+    {
+    id: '6',
+    name: 'neena devi',
+    age: 45,
+    gender: 'Female',
+    voterIdNumber: 'DLH9876543',
+    boothAddress: 'COMMUNITY CENTER, JANAKPURI, NEW DELHI-110058',
+    boothNo: 104,
+    mobile: '9988776655',
+    houseNo: 'C-789',
+    city: 'DELHI',
+    relatedTo: 'ramesh singh',
+    isPrint: true
+  },
+    {
+    id: '7',
+    name: 'manju devi',
+    age: 45,
+    gender: 'Female',
+    voterIdNumber: 'DLH9876543',
+    boothAddress: 'COMMUNITY CENTER, JANAKPURI, NEW DELHI-110058',
+    boothNo: 104,
+    mobile: '9988776655',
+    houseNo: 'C-789',
+    city: 'DELHI',
+    relatedTo: 'ramesh singh',
+    isPrint: true
   }
 ];
+
+const groupByHouseNumber = (voters: typeof mockVoterData) => {
+  const groups: Record<string, VoterRecord[]> = {};
+  voters.forEach((voter) => {
+    if (!groups[voter.houseNo]) {
+      groups[voter.houseNo] = [];
+    }
+    groups[voter.houseNo].push(voter);
+  });
+  return groups;
+};
 
 const VoterList = () => {
   const [filters, setFilters] = useState({
@@ -96,6 +150,8 @@ const VoterList = () => {
     mobileAvailable: false,
     printEnabled: false
   });
+  const [open, setOpen] = useState(false);
+  const [selectedHouse, setSelectedHouse] = useState<string | null>(null);
 
   const cities = useMemo(() => {
     const uniqueCities = [...new Set(mockVoterData.map(voter => voter.city))];
@@ -117,6 +173,60 @@ const VoterList = () => {
       return true;
     });
   }, [filters]);
+
+  const handlegroupPrint = () => {
+  if (!selectedHouse) return;
+  const voters = groups[selectedHouse] || [];
+  const printWindow = window.open('', '_blank');
+  if (printWindow) {
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Voters in House No: ${selectedHouse}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h2 { text-align: center; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+            th { background: #f5f5f5; }
+          </style>
+        </head>
+        <body>
+          <h2>Voters in House No: ${selectedHouse}</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Voter ID</th>
+                <th>Name</th>
+                <th>House No</th>
+                <th>Related To</th>
+                <th>Booth No</th>
+                <th>Mobile</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${voters
+                .map(
+                  v =>
+                    `<tr>
+                      <td>${v.voterIdNumber}</td>
+                      <td>${v.name}</td>
+                      <td>${v.houseNo || '(blank)'}</td>
+                      <td>${v.relatedTo}</td>
+                      <td>${v.boothNo}</td>
+                      <td>${v.mobile || 'Not available'}</td>
+                    </tr>`
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  }
+};
 
   const handlePrint = (voter: VoterRecord) => {
     const printWindow = window.open('', '_blank');
@@ -151,6 +261,12 @@ const VoterList = () => {
     }
   };
 
+  const groups = groupByHouseNumber(mockVoterData);
+
+  const handleGroupByClick = (houseNumber: string) => {
+    setSelectedHouse(houseNumber);
+    setOpen(true);
+  };
 
   return (
     <DetailPageLayout title="Voter Records">
@@ -288,59 +404,68 @@ const VoterList = () => {
 
         {/* Voter Records List */}
         <div className="lg:col-span-3">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Search className="h-5 w-5" />
-                  Voter Records ({filteredVoters.length})
-                </CardTitle>
-              </div>
-            </CardHeader>
+          <div>
             <CardContent>
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {filteredVoters.map((voter) => (
-                  <Card key={voter.id} className="border border-civic-border bg-civic-surface/50">
-                    <CardContent className="p-4">
-                      <div className="space-y-2">
-                        <div className="flex items-start justify-between">
-                          <div className="space-y-1 flex-1">
-                            <h3 className="font-semibold text-lg text-civic-primary">
-                              {voter.name} ({voter.gender}, {voter.age})
-                            </h3>
-                            <p className="text-sm text-muted-foreground">
-                              <span className="font-medium">Voter ID:</span> {voter.voterIdNumber}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              <span className="font-medium">Related To:</span> {voter.relatedTo}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              <span className="font-medium">House No:</span> {voter.houseNo || '(blank)'}, 
-                              <span className="font-medium"> City:</span> {voter.city}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              <span className="font-medium">Booth:</span> {voter.boothAddress}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              <span className="font-medium">Mobile:</span> {voter.mobile || 'Not available'}
-                            </p>
+                  <Card
+                    key={voter.id}
+                    className="flex flex-col border border-civic-border bg-civic-surface/50 rounded-xl shadow-lg overflow-hidden"
+                  >
+                    <div className="flex-1 flex flex-col justify-between p-6">
+                      <div>
+                        <h3 className="font-semibold text-2xl text-civic-primary mb-2">
+                          {voter.name} <span className="text-base font-normal text-muted-foreground">({voter.gender}, {voter.age})</span>
+                        </h3>
+                        <div className="grid grid-cols-1 gap-y-1 text-sm mb-4">
+                          <div>
+                            <span className="font-medium">Voter ID:</span> {voter.voterIdNumber}
                           </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handlePrint(voter)}
-                            disabled={!voter.isPrint}
-                            className="ml-4 flex items-center gap-2"
-                          >
-                            <Printer className="h-4 w-4" />
-                            Print
-                          </Button>
+                          <div>
+                            <span className="font-medium">Related To:</span> {voter.relatedTo}
+                          </div>
+                          <div>
+                            <span className="font-medium">House No:</span> {voter.houseNo || '(blank)'}
+                          </div>
+                          <div>
+                            <span className="font-medium">City:</span> {voter.city}
+                          </div>
+                          <div>
+                             <span className="font-medium">Booth Address:</span> {voter.boothAddress}
+                          </div>
+                          <div>
+                            <span className="font-medium">Booth No:</span> {voter.boothNo}
+                          </div>
+                          <div>
+                            <span className="font-medium">Mobile:</span> {voter.mobile || 'Not available'}
+                          </div>
                         </div>
                       </div>
-                    </CardContent>
+                      <div className="flex gap-3 mt-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePrint(voter)}
+                          disabled={!voter.isPrint}
+                          className="flex items-center gap-2"
+                        >
+                          <Printer className="h-4 w-4" />
+                          Print
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleGroupByClick(voter.houseNo)}
+                          disabled={!voter.isPrint}
+                          className="flex items-center gap-2"
+                        >
+                          <Monitor className="h-4 w-4" />
+                          Group By
+                        </Button>
+                      </div>
+                    </div>
                   </Card>
-                ))}
-                
+                ))}  
                 {filteredVoters.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -349,9 +474,32 @@ const VoterList = () => {
                 )}
               </div>
             </CardContent>
-          </Card>
+          </div>
         </div>
       </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {selectedHouse ? `Voters in House No: ${selectedHouse}` : "Group By House Number"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            {selectedHouse &&
+              groups[selectedHouse]?.map((voter, idx) => (
+                <div key={idx} className="flex justify-between border-b py-1 items-center">
+              <span className="flex-1">{voter.name}</span>
+              <span className="flex-1 text-center text-xs text-muted-foreground">{voter.relatedTo}</span>
+              <span className="flex-1 text-right text-xs text-muted-foreground">{voter.voterIdNumber}</span>
+            </div>
+              ))}
+          </div>
+          <DialogClose asChild>
+            <Button variant="outline" className="mt-4 w-full" onClick = {handlegroupPrint}>Print</Button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
     </DetailPageLayout>
   );
 };

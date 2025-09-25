@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, UserPlus } from "lucide-react";
+import { apiRequest } from "@/lib/utils";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -67,14 +68,14 @@ const Signup = () => {
       return false;
     }
     
-    if (!formData.activationCode.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Activation Code is required",
-        variant: "destructive"
-      });
-      return false;
-    }
+    // if (!formData.activationCode.trim()) {
+    //   toast({
+    //     title: "Validation Error",
+    //     description: "Activation Code is required",
+    //     variant: "destructive"
+    //   });
+    //   return false;
+    // }
     
     return true;
   };
@@ -88,44 +89,40 @@ const Signup = () => {
     
     setIsLoading(true);
     
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Mock validation - in real app, this would be an API call
-      if (formData.activationCode !== "ADMIN2024") {
-        throw new Error("Invalid activation code");
+   try {
+    // Replace with your actual API endpoint
+    const data = await apiRequest<{ name: string; email: string; avatar?: string | null; mobile: string }>(
+      "https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/auth/register-candidate-admin",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+          name: formData.fullName,
+          role:'CANDIDATE_ADMIN',
+          mobileNumber: formData.mobileNumber,
+          // activationCode: formData.activationCode,
+        }),
       }
-      
-      // Store user data
-      const userData = {
-        name: formData.fullName,
-        email: formData.username + "@chunaav.com", // Mock email generation
-        avatar: null,
-        mobile: formData.mobileNumber
-      };
-      
-      localStorage.setItem("user", JSON.stringify(userData));
-      
-      toast({
-        title: "Account Created!",
-        description: "Welcome to Chunaav Dashboard. Redirecting to dashboard...",
-      });
-      
-      // Redirect to dashboard after successful signup
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1000);
-      
-    } catch (error) {
-      toast({
-        title: "Signup Failed",
-        description: error instanceof Error ? error.message : "An error occurred during signup. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    );
+
+    localStorage.setItem("user", JSON.stringify(data));
+    setTimeout(() => {
+      navigate("/dashboard");
+    }, 1000);
+    toast({
+      title: "Account Created!",
+      description: "Welcome to Chunaav Dashboard. Redirecting to dashboard...",
+    });
+  } catch (error: any) {
+    toast({
+      title: "Signup Failed",
+      description: error.message || "An error occurred during signup. Please try again.",
+      variant: "destructive",
+    });
+  } finally {
+    setIsLoading(false);
+  }
   };
 
   return (
@@ -218,7 +215,7 @@ const Signup = () => {
               />
             </div>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="activationCode">Activation Code</Label>
               <Input
                 id="activationCode"
@@ -230,7 +227,7 @@ const Signup = () => {
                 required
                 className="transition-all duration-200 focus:ring-2 focus:ring-civic-primary/20"
               />
-            </div>
+            </div> */}
 
             <Button 
               type="submit" 

@@ -18,6 +18,7 @@ interface EnhancedHeaderProps {
 const EnhancedHeader = ({ user }: EnhancedHeaderProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const userData = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") as string) : null;
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -45,8 +46,8 @@ const EnhancedHeader = ({ user }: EnhancedHeaderProps) => {
           {/* Enhanced User Profile Section */}
           <div className="flex items-center space-x-6">
             <div className="text-right hidden lg:block">
-              <p className="text-white font-bold text-xl">{user.name}</p>
-              <p className="text-blue-100 text-base mt-1">{user.email}</p>
+              <p className="text-white font-bold text-xl">{userData.activationCode}</p>
+              <p className="text-blue-100 text-base mt-1">{userData.role}</p>
             </div>
             
             <DropdownMenu>
@@ -59,7 +60,7 @@ const EnhancedHeader = ({ user }: EnhancedHeaderProps) => {
                       className="object-cover"
                     />
                     <AvatarFallback className="bg-civic-primary text-white text-2xl font-bold">
-                      {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                      {userData?.activationCode}
                     </AvatarFallback>
                   </Avatar>
                 </Button>

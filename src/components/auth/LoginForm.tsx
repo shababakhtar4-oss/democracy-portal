@@ -6,19 +6,21 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Vote, UserPlus } from "lucide-react";
+import { apiRequest } from "@/lib/utils";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [activationcode, setActivationcode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  // const validateEmail = (email: string) => {
+  //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  //   return emailRegex.test(email);
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +34,7 @@ const LoginForm = () => {
       return;
     }
 
-    if (!validateEmail(email)) {
+    if (!email) {
       toast({
         title: "Invalid Email",
         description: "Please enter a valid email address",
@@ -40,33 +42,42 @@ const LoginForm = () => {
       });
       return;
     }
+        if (!activationcode.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Activation Code is required",
+        variant: "destructive"
+      });
+      return false;
+    }
 
     setIsLoading(true);
 
     // Mock authentication - accept any valid email/password
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      
-      // Store user info in localStorage
-      localStorage.setItem("user", JSON.stringify({
-        name: "John Doe",
-        email: email,
-        avatar: null
-      }));
-      
-      toast({
-        title: "Login Successful",
-        description: "Welcome to Chunaav!",
-      });
-      
-      navigate("/dashboard");
-    } catch (error) {
-      toast({
-        title: "Login Failed",
-        description: "Invalid credentials. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
+    // Replace with your actual API endpoint
+    const data = await apiRequest<{ name: string; email: string; activationCode: string }>(
+      `https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/auth/login?identifier=${email}&password=${password}&activationCode=${activationcode}`,
+      {
+        method: "POST",
+      }
+    );
+
+    localStorage.setItem("user", JSON.stringify(data));
+
+    toast({
+      title: "Login Successful",
+      description: "Welcome to Chunaav!",
+    });
+
+    navigate("/dashboard");
+  } catch (error: any) {
+    toast({
+      title: "Login Failed",
+      description: error.message || "Invalid credentials. Please try again.",
+      variant: "destructive",
+    });
+  } finally {
       setIsLoading(false);
     }
   };
@@ -88,11 +99,11 @@ const LoginForm = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">User Name/Mobile</Label>
               <Input
                 id="email"
-                type="email"
-                placeholder="Enter your email"
+                type="text"
+                placeholder="Enter your Username/Mobile number"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="transition-all duration-200 focus:ring-civic-primary"
@@ -118,6 +129,21 @@ const LoginForm = () => {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+            </div>
+
+            
+            <div className="space-y-2">
+              <Label htmlFor="activationCode">Activation Code</Label>
+              <Input
+                id="activationCode"
+                name="activationCode"
+                type="text"
+                placeholder="Enter activation code"
+                value={activationcode}
+                onChange={(e)=>setActivationcode(e.target.value)}
+                required
+                className="transition-all duration-200 focus:ring-2 focus:ring-civic-primary/20"
+              />
             </div>
 
             <Button

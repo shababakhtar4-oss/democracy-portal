@@ -8,36 +8,37 @@ interface DashboardTileProps {
   icon: LucideIcon;
   onClick: () => void;
   className?: string;
+  titleClassName?: string;
+  descriptionClassName?: string;
+  iconClassName?: string;
 }
 
-const DashboardTile = ({ title, description, icon: Icon, onClick, className }: DashboardTileProps) => {
+const DashboardTile = ({ 
+  title,
+  description,
+  icon: Icon,
+  onClick,
+  className,
+  titleClassName = "",
+  descriptionClassName = "",
+  iconClassName = "",
+ }: DashboardTileProps) => {
   return (
-    <Card 
-      className={cn(
-        "cursor-pointer transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1 bg-gradient-card border-0 shadow-card group",
-        className
-      )}
-      onClick={onClick}
-    >
-      <CardContent className="p-6 text-center">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="p-3 bg-gradient-primary rounded-full group-hover:scale-110 transition-transform duration-300">
-            <Icon className="h-8 w-8 text-white" />
-          </div>
-          
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-civic-primary group-hover:text-civic-primary-light transition-colors">
-              {title}
-            </h3>
-            {description && (
-              <p className="text-sm text-muted-foreground">
-                {description}
-              </p>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div
+    className={`p-6 ${className}`}
+    onClick={onClick}
+    tabIndex={0}
+    role="button"
+    onKeyDown={e => {
+      if (e.key === "Enter" || e.key === " ") onClick();
+    }}
+  >
+    <div className="flex items-center gap-4 mb-4">
+      <Icon className={`h-10 w-10 ${iconClassName}`} />
+      <span className={`block ${titleClassName}`}>{title}</span>
+    </div>
+    <div className={descriptionClassName}>{description}</div>
+  </div>
   );
 };
 
