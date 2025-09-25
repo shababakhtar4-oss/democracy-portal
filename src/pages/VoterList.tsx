@@ -406,48 +406,94 @@ const VoterList = () => {
         <div className="lg:col-span-3">
           <div>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredVoters.map((voter) => (
                   <Card
                     key={voter.id}
-                    className="flex flex-col border border-civic-border bg-civic-surface/50 rounded-xl shadow-lg overflow-hidden"
+                    className="group relative overflow-hidden bg-gradient-to-br from-white to-gray-50/80 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                   >
-                    <div className="flex-1 flex flex-col justify-between p-6">
-                      <div>
-                        <h3 className="font-semibold text-2xl text-civic-primary mb-2">
-                          {voter.name} <span className="text-base font-normal text-muted-foreground">({voter.gender}, {voter.age})</span>
-                        </h3>
-                        <div className="grid grid-cols-1 gap-y-1 text-sm mb-4">
-                          <div>
-                            <span className="font-medium">Voter ID:</span> {voter.voterIdNumber}
-                          </div>
-                          <div>
-                            <span className="font-medium">Related To:</span> {voter.relatedTo}
-                          </div>
-                          <div>
-                            <span className="font-medium">House No:</span> {voter.houseNo || '(blank)'}
-                          </div>
-                          <div>
-                            <span className="font-medium">City:</span> {voter.city}
-                          </div>
-                          <div>
-                             <span className="font-medium">Booth Address:</span> {voter.boothAddress}
-                          </div>
-                          <div>
-                            <span className="font-medium">Booth No:</span> {voter.boothNo}
-                          </div>
-                          <div>
-                            <span className="font-medium">Mobile:</span> {voter.mobile || 'Not available'}
+                    {/* Header with gradient background */}
+                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 text-white">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-bold text-lg leading-tight">
+                            {voter.name}
+                          </h3>
+                          <p className="text-blue-100 text-sm">
+                            {voter.gender} • {voter.age} years
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <div className="bg-white/20 rounded-lg px-3 py-1">
+                            <p className="text-xs font-medium">Booth</p>
+                            <p className="text-sm font-bold">{voter.boothNo}</p>
                           </div>
                         </div>
                       </div>
-                      <div className="flex gap-3 mt-4">
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-5">
+                      <div className="space-y-3">
+                        {/* Voter ID - Prominent display */}
+                        <div className="bg-gray-50 rounded-lg p-3 border-l-4 border-blue-500">
+                          <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">Voter ID</p>
+                          <p className="text-sm font-bold text-gray-900">{voter.voterIdNumber}</p>
+                        </div>
+
+                        {/* Personal Details */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <p className="text-xs text-gray-500 font-medium">Related To</p>
+                            <p className="text-sm font-semibold text-gray-800 capitalize">{voter.relatedTo}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500 font-medium">House No</p>
+                            <p className="text-sm font-semibold text-gray-800">{voter.houseNo || 'N/A'}</p>
+                          </div>
+                        </div>
+
+                        {/* Location Info */}
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium mb-1">Location</p>
+                          <div className="bg-green-50 rounded-lg p-2 border border-green-200">
+                            <p className="text-xs font-semibold text-green-800">{voter.city}</p>
+                          </div>
+                        </div>
+
+                        {/* Contact Info */}
+                        {voter.mobile && (
+                          <div className="flex items-center gap-2 bg-orange-50 rounded-lg p-2 border border-orange-200">
+                            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            <div>
+                              <p className="text-xs text-orange-700 font-medium">Mobile</p>
+                              <p className="text-sm font-semibold text-orange-800">{voter.mobile}</p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {!voter.mobile && (
+                          <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                            <p className="text-xs text-gray-500">No mobile number</p>
+                          </div>
+                        )}
+
+                        {/* Booth Address - Collapsible */}
+                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                          <p className="text-xs text-blue-700 font-medium mb-1">Booth Address</p>
+                          <p className="text-xs text-blue-800 leading-relaxed">{voter.boothAddress}</p>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2 mt-5 pt-4 border-t border-gray-100">
                         <Button
-                          variant="outline"
+                          variant={voter.isPrint ? "default" : "secondary"}
                           size="sm"
                           onClick={() => handlePrint(voter)}
                           disabled={!voter.isPrint}
-                          className="flex items-center gap-2"
+                          className="flex-1 flex items-center justify-center gap-2 font-medium"
                         >
                           <Printer className="h-4 w-4" />
                           Print
@@ -457,11 +503,18 @@ const VoterList = () => {
                           size="sm"
                           onClick={() => handleGroupByClick(voter.houseNo)}
                           disabled={!voter.isPrint}
-                          className="flex items-center gap-2"
+                          className="flex-1 flex items-center justify-center gap-2 font-medium hover:bg-gray-50"
                         >
                           <Monitor className="h-4 w-4" />
-                          Group By
+                          Group
                         </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Status indicator */}
+                    <div className="absolute top-2 right-2">
+                      <div className={`w-3 h-3 rounded-full ${voter.isPrint ? 'bg-green-400' : 'bg-red-400'}`} 
+                           title={voter.isPrint ? 'Print enabled' : 'Print disabled'}>
                       </div>
                     </div>
                   </Card>
