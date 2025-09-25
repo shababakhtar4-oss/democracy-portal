@@ -503,7 +503,7 @@ const VoterList = () => {
                           size="sm"
                           onClick={() => handleGroupByClick(voter.houseNo)}
                           disabled={!voter.isPrint}
-                          className="flex-1 flex items-center justify-center gap-2 font-medium hover:bg-gray-50"
+                          className="flex-1 flex items-center justify-center gap-2 font-medium bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100 hover:border-teal-300 disabled:bg-gray-50 disabled:border-gray-200 disabled:text-gray-400"
                         >
                           <Monitor className="h-4 w-4" />
                           Group
