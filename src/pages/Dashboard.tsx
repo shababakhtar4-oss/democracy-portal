@@ -60,17 +60,7 @@ const Dashboard = () => {
     },
   ];
 
-  const dashboardItems = [
-    {
-      title: "Upload to Excel",
-      description: "Drag & Drop or Click to Upload",
-      icon: UploadCloud,
-      path: "#",
-      action: "upload",
-      bgColor: "bg-blue-50 hover:bg-blue-100",
-      iconColor: "text-blue-600",
-      textColor: "text-slate-800",
-    },
+  const navigationItems = [
     {
       title: "List",
       description: "Manage voter lists and records",
@@ -98,7 +88,27 @@ const Dashboard = () => {
       iconColor: "text-teal-800",
       textColor: "text-slate-800",
     },
+    {
+      title: "Voter Reports",
+      description: "Generate and view voter reports",
+      icon: BarChart3,
+      path: "/voter-report",
+      bgColor: "bg-purple-400 hover:bg-purple-500",
+      iconColor: "text-white",
+      textColor: "text-white",
+    },
   ];
+
+  const uploadItem = {
+    title: "Upload to Excel",
+    description: "Drag & Drop or Click to Upload",
+    icon: UploadCloud,
+    path: "#",
+    action: "upload",
+    bgColor: "bg-blue-50 hover:bg-blue-100",
+    iconColor: "text-blue-600",
+    textColor: "text-slate-800",
+  };
 
   const handleTileClick = (path: string, action?: string) => {
     if (action === "upload") {
@@ -185,29 +195,56 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Action Tiles */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-          {dashboardItems.map((item) => (
+        {/* Action Grids */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Navigation Grid - 2x2 */}
+          <div className="lg:col-span-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {navigationItems.map((item) => (
+                <div
+                  key={item.title}
+                  className={`${item.bgColor} rounded-2xl p-8 cursor-pointer transition-all duration-200 hover:scale-105 shadow-lg`}
+                  onClick={() => handleTileClick(item.path)}
+                >
+                  <div className="flex flex-col items-center text-center space-y-4">
+                    <div className="p-4 rounded-full bg-white/20">
+                      <item.icon className={`h-12 w-12 ${item.iconColor}`} />
+                    </div>
+                    <div>
+                      <h3 className={`text-2xl font-bold ${item.textColor} mb-2`}>
+                        {item.title}
+                      </h3>
+                      <p className={`${item.textColor} opacity-80`}>
+                        {item.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Upload Grid */}
+          <div className="lg:col-span-1">
             <div
-              key={item.title}
-              className={`${item.bgColor} rounded-2xl p-8 cursor-pointer transition-all duration-200 hover:scale-105 shadow-lg`}
-              onClick={() => handleTileClick(item.path, item.action)}
+              className={`${uploadItem.bgColor} rounded-2xl p-8 cursor-pointer transition-all duration-200 hover:scale-105 shadow-lg h-full`}
+              onClick={() => handleTileClick(uploadItem.path, uploadItem.action)}
             >
-              <div className="flex flex-col items-center text-center space-y-4">
+              <div className="flex flex-col items-center text-center space-y-4 h-full justify-center">
                 <div className="p-4 rounded-full bg-white/20">
-                  <item.icon className={`h-12 w-12 ${item.iconColor}`} />
+                  <uploadItem.icon className={`h-12 w-12 ${uploadItem.iconColor}`} />
                 </div>
                 <div>
-                  <h3 className={`text-2xl font-bold ${item.textColor} mb-2`}>
-                    {item.title}
+                  <h3 className={`text-2xl font-bold ${uploadItem.textColor} mb-2`}>
+                    {uploadItem.title}
                   </h3>
-                  <p className={`${item.textColor} opacity-80`}>
-                    {item.description}
+                  <p className={`${uploadItem.textColor} opacity-80`}>
+                    {uploadItem.description}
                   </p>
                 </div>
               </div>
             </div>
-          ))}
+          </div>
         </div>
 
         {/* Hidden file input */}
