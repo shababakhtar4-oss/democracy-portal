@@ -4,12 +4,11 @@ import {
   List,
   Settings,
   Clock,
-  FileText,
-  Key,
-  Users,
   UploadCloud,
+  BarChart3,
 } from "lucide-react";
-import EnhancedHeader from "@/components/layout/EnhancedHeader";
+import SimpleHeader from "@/components/layout/SimpleHeader";
+import StatCard from "@/components/dashboard/StatCard";
 import DashboardTile from "@/components/dashboard/DashboardTile";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
@@ -35,47 +34,78 @@ const Dashboard = () => {
     setUser(JSON.parse(storedUser));
   }, [navigate]);
 
+  const userData = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") as string) : null;
+
+  const statCards = [
+    {
+      title: "Activation Code",
+      value: userData?.activationCode || "AXC134",
+      subtitle: "Overview of Last month",
+      progress: 60,
+      progressColor: "hsl(254 73% 58%)",
+    },
+    {
+      title: "Total Records", 
+      value: "20,000+",
+      subtitle: "Overview of Last month",
+      progress: 500,
+      progressColor: "hsl(168 76% 42%)",
+    },
+    {
+      title: "Constituency Name",
+      value: "Constituency Name",
+      subtitle: "",
+      progress: 0,
+      progressColor: "hsl(197 71% 73%)",
+    },
+  ];
+
   const dashboardItems = [
+    {
+      title: "Upload to Excel",
+      description: "Drag & Drop or Click to Upload",
+      icon: UploadCloud,
+      path: "#",
+      action: "upload",
+      bgColor: "bg-blue-50 hover:bg-blue-100",
+      iconColor: "text-blue-600",
+      textColor: "text-slate-800",
+    },
     {
       title: "List",
       description: "Manage voter lists and records",
       icon: List,
       path: "/list",
+      bgColor: "bg-yellow-300 hover:bg-yellow-400",
+      iconColor: "text-orange-600",
+      textColor: "text-slate-800",
     },
     {
       title: "Settings",
-      description: "System configuration and preferences",
+      description: "System configuration and preferences", 
       icon: Settings,
       path: "/settings",
+      bgColor: "bg-teal-500 hover:bg-teal-600",
+      iconColor: "text-white",
+      textColor: "text-white",
     },
     {
       title: "Recent Logins",
       description: "View login history and activity",
       icon: Clock,
       path: "/recent-logins",
+      bgColor: "bg-teal-200 hover:bg-teal-300",
+      iconColor: "text-teal-800",
+      textColor: "text-slate-800",
     },
-    {
-      title: "Voter Report",
-      description: "Generate and view voter reports",
-      icon: FileText,
-      path: "/voter-report",
-    },
-    // {
-    //   title: "Activation Code",
-    //   description: "Manage system activation codes",
-    //   icon: Key,
-    //   path: "/activation-code",
-    // },
-    // {
-    //   title: "Booth Committee",
-    //   description: "Manage booth committee members",
-    //   icon: Users,
-    //   path: "/booth-committee",
-    // },
   ];
 
-  const handleTileClick = (path: string) => {
-    navigate(path);
+  const handleTileClick = (path: string, action?: string) => {
+    if (action === "upload") {
+      handleUploadClick();
+    } else {
+      navigate(path);
+    }
   };
 
   const handleUploadClick = () => {
@@ -136,55 +166,58 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <EnhancedHeader user={user} />
+    <div className="min-h-screen bg-gray-50">
+      <SimpleHeader user={user} />
 
-      <main className="container mx-auto px-6 py-8">
-        <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-civic-primary mb-2">
-              Dashboard
-            </h2>
-            <p className="text-muted-foreground">
-              Welcome back, {user.name}. Here's your election management overview.
-            </p>
-          </div>
-          <div>
-            <input
-              type="file"
-              accept=".csv,.xlsx,.xls"
-              ref={fileInputRef}
-              style={{ display: "none" }}
-              onChange={handleFileChange}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleUploadClick}
-              disabled={uploading}
-              className="flex items-center gap-2"
-            >
-              <UploadCloud className="h-5 w-5" />
-              {uploading ? "Uploading..." : "Upload Data File"}
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-10">
-          {dashboardItems.map((item) => (
-            <DashboardTile
-              key={item.title}
-              title={item.title}
-              description={item.description}
-              icon={item.icon}
-              onClick={() => handleTileClick(item.path)}
-              className="bg-gradient-to-br from-civic-primary/90 to-civic-primary/60 rounded-2xl shadow-lg min-h-[180px] flex items-center transition-transform hover:scale-105 cursor-pointer"
-              titleClassName="text-white text-xl font-semibold"
-              descriptionClassName="text-white/90"
-              iconClassName="text-white opacity-90"
+      <main className="container mx-auto px-8 py-8">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {statCards.map((stat) => (
+            <StatCard
+              key={stat.title}
+              title={stat.title}
+              value={stat.value}
+              subtitle={stat.subtitle}
+              progress={stat.progress}
+              progressColor={stat.progressColor}
+              className="border border-purple-200"
             />
           ))}
         </div>
+
+        {/* Action Tiles */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          {dashboardItems.map((item) => (
+            <div
+              key={item.title}
+              className={`${item.bgColor} rounded-2xl p-8 cursor-pointer transition-all duration-200 hover:scale-105 shadow-lg`}
+              onClick={() => handleTileClick(item.path, item.action)}
+            >
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="p-4 rounded-full bg-white/20">
+                  <item.icon className={`h-12 w-12 ${item.iconColor}`} />
+                </div>
+                <div>
+                  <h3 className={`text-2xl font-bold ${item.textColor} mb-2`}>
+                    {item.title}
+                  </h3>
+                  <p className={`${item.textColor} opacity-80`}>
+                    {item.description}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Hidden file input */}
+        <input
+          type="file"
+          accept=".csv,.xlsx,.xls"
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
       </main>
     </div>
   );

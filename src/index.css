@@ -44,6 +44,14 @@ All colors MUST be HSL.
     --civic-neutral: 210 16% 82%;
     --civic-surface: 0 0% 100%;
     
+    /* Dashboard theme colors */
+    --dashboard-purple: 254 73% 58%;
+    --dashboard-yellow: 45 93% 47%;
+    --dashboard-teal: 168 76% 42%;
+    --dashboard-light-teal: 174 72% 56%;
+    --dashboard-blue: 197 71% 73%;
+    --dashboard-orange: 25 95% 53%;
+    
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(220 91% 40%), hsl(220 85% 55%));
     --gradient-hero: linear-gradient(135deg, hsl(220 91% 40%) 0%, hsl(142 76% 36%) 100%);
