@@ -109,9 +109,10 @@ const Dashboard = () => {
     icon: UploadCloud,
     path: "#",
     action: "upload",
-    bgColor: "bg-blue-50 hover:bg-blue-100",
-    iconColor: "text-blue-600",
-    textColor: "text-slate-800",
+    cardClass: "dashboard-card-blue",
+    iconBg: "bg-blue-600/80",
+    iconColor: "text-white",
+    textColor: "text-white",
   };
 
   const handleTileClick = (path: string, action?: string) => {
@@ -231,18 +232,18 @@ const Dashboard = () => {
           {/* Upload Grid */}
           <div className="lg:col-span-1">
             <div
-              className={`${uploadItem.bgColor} rounded-2xl p-8 cursor-pointer transition-all duration-200 hover:scale-105 shadow-lg h-full`}
+              className={`${uploadItem.cardClass} rounded-2xl p-8 cursor-pointer transition-all duration-200 hover:scale-105 shadow-lg h-full`}
               onClick={() => handleTileClick(uploadItem.path, uploadItem.action)}
             >
-              <div className="flex flex-col items-center text-center space-y-4 h-full justify-center">
-                <div className="p-4 rounded-full bg-white/20">
+              <div className="flex flex-col items-center text-center space-y-4 h-full justify-center relative z-10">
+                <div className={`p-4 rounded-full ${uploadItem.iconBg} backdrop-blur-sm border border-white/20`}>
                   <uploadItem.icon className={`h-12 w-12 ${uploadItem.iconColor}`} />
                 </div>
                 <div>
-                  <h3 className={`text-2xl font-bold ${uploadItem.textColor} mb-2`}>
+                  <h3 className={`text-2xl font-bold ${uploadItem.textColor} mb-2 drop-shadow-sm`}>
                     {uploadItem.title}
                   </h3>
-                  <p className={`${uploadItem.textColor} opacity-80`}>
+                  <p className={`${uploadItem.textColor} opacity-90 drop-shadow-sm`}>
                     {uploadItem.description}
                   </p>
                 </div>
