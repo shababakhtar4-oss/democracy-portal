@@ -184,42 +184,171 @@ const VoterList = () => {
         <head>
           <title>Voters in House No: ${selectedHouse}</title>
           <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            h2 { text-align: center; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-            th { background: #f5f5f5; }
+            body { 
+              font-family: Arial, sans-serif; 
+              padding: 20px; 
+              line-height: 1.4;
+              background-color: #f8f9fa;
+            }
+            h2 { 
+              text-align: center; 
+              color: #333;
+              margin-bottom: 30px;
+              padding-bottom: 10px;
+              border-bottom: 2px solid #007bff;
+            }
+            .voter-card {
+              background: white;
+              border-radius: 8px;
+              padding: 20px;
+              margin-bottom: 20px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              border-left: 4px solid #007bff;
+            }
+            .voter-header {
+              background: linear-gradient(135deg, #007bff, #6610f2);
+              color: white;
+              padding: 15px;
+              border-radius: 6px;
+              margin-bottom: 15px;
+            }
+            .voter-name {
+              font-size: 18px;
+              font-weight: bold;
+              margin: 0;
+            }
+            .voter-details {
+              font-size: 14px;
+              opacity: 0.9;
+            }
+            .info-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 15px;
+              margin-bottom: 15px;
+            }
+            .info-item {
+              background: #f8f9fa;
+              padding: 12px;
+              border-radius: 6px;
+              border-left: 3px solid #28a745;
+            }
+            .info-label {
+              font-size: 11px;
+              font-weight: bold;
+              color: #666;
+              text-transform: uppercase;
+              margin-bottom: 4px;
+            }
+            .info-value {
+              font-size: 14px;
+              color: #333;
+              font-weight: 600;
+            }
+            .voter-id {
+              background: #e3f2fd;
+              border: 1px solid #2196f3;
+              padding: 12px;
+              border-radius: 6px;
+              margin-bottom: 15px;
+              text-align: center;
+            }
+            .voter-id-label {
+              font-size: 12px;
+              color: #1976d2;
+              font-weight: bold;
+              margin-bottom: 4px;
+            }
+            .voter-id-value {
+              font-size: 16px;
+              color: #0d47a1;
+              font-weight: bold;
+            }
+            .booth-address {
+              background: #fff3e0;
+              border: 1px solid #ff9800;
+              padding: 12px;
+              border-radius: 6px;
+              margin-top: 15px;
+            }
+            .booth-label {
+              font-size: 11px;
+              color: #f57c00;
+              font-weight: bold;
+              margin-bottom: 6px;
+            }
+            .booth-text {
+              font-size: 13px;
+              color: #e65100;
+              line-height: 1.4;
+            }
+            .mobile-info {
+              background: #f3e5f5;
+              border: 1px solid #9c27b0;
+              padding: 12px;
+              border-radius: 6px;
+              text-align: center;
+            }
+            .no-mobile {
+              background: #fafafa;
+              border: 1px solid #bdbdbd;
+              color: #757575;
+            }
+            @media print {
+              .voter-card {
+                page-break-inside: avoid;
+                margin-bottom: 30px;
+              }
+            }
           </style>
         </head>
         <body>
           <h2>Voters in House No: ${selectedHouse}</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Voter ID</th>
-                <th>Name</th>
-                <th>House No</th>
-                <th>Related To</th>
-                <th>Booth No</th>
-                <th>Mobile</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${voters
-                .map(
-                  v =>
-                    `<tr>
-                      <td>${v.voterIdNumber}</td>
-                      <td>${v.name}</td>
-                      <td>${v.houseNo || '(blank)'}</td>
-                      <td>${v.relatedTo}</td>
-                      <td>${v.boothNo}</td>
-                      <td>${v.mobile || 'Not available'}</td>
-                    </tr>`
-                )
-                .join("")}
-            </tbody>
-          </table>
+          ${voters
+            .map(
+              v =>
+                `<div class="voter-card">
+                  <div class="voter-header">
+                    <div class="voter-name">${v.name}</div>
+                    <div class="voter-details">${v.gender} • ${v.age} years old</div>
+                  </div>
+                  
+                  <div class="voter-id">
+                    <div class="voter-id-label">VOTER ID NUMBER</div>
+                    <div class="voter-id-value">${v.voterIdNumber}</div>
+                  </div>
+                  
+                  <div class="info-grid">
+                    <div class="info-item">
+                      <div class="info-label">Related To</div>
+                      <div class="info-value">${v.relatedTo}</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">House No</div>
+                      <div class="info-value">${v.houseNo || 'Not Available'}</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">City</div>
+                      <div class="info-value">${v.city}</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">Booth No</div>
+                      <div class="info-value">${v.boothNo}</div>
+                    </div>
+                  </div>
+                  
+                  <div class="mobile-info ${v.mobile ? '' : 'no-mobile'}">
+                    <div class="info-label">Mobile Number</div>
+                    <div class="info-value">${v.mobile || 'Not Available'}</div>
+                  </div>
+                  
+                  <div class="booth-address">
+                    <div class="booth-label">Booth Address</div>
+                    <div class="booth-text">${v.boothAddress}</div>
+                  </div>
+                </div>`
+            )
+            .join("")}
         </body>
       </html>
     `);
