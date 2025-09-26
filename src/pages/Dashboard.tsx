@@ -66,16 +66,18 @@ const Dashboard = () => {
       description: "Manage voter lists and records",
       icon: List,
       path: "/list",
-      bgColor: "bg-yellow-300 hover:bg-yellow-400",
-      iconColor: "text-orange-600",
-      textColor: "text-slate-800",
+      cardClass: "dashboard-card-orange",
+      iconBg: "bg-orange-500/80",
+      iconColor: "text-white",
+      textColor: "text-white",
     },
     {
       title: "Settings",
       description: "System configuration and preferences", 
       icon: Settings,
       path: "/settings",
-      bgColor: "bg-teal-500 hover:bg-teal-600",
+      cardClass: "dashboard-card-teal",
+      iconBg: "bg-teal-600/80",
       iconColor: "text-white",
       textColor: "text-white",
     },
@@ -84,16 +86,18 @@ const Dashboard = () => {
       description: "View login history and activity",
       icon: Clock,
       path: "/recent-logins",
-      bgColor: "bg-teal-200 hover:bg-teal-300",
-      iconColor: "text-teal-800",
-      textColor: "text-slate-800",
+      cardClass: "dashboard-card-mint",
+      iconBg: "bg-teal-700/80",
+      iconColor: "text-white",
+      textColor: "text-teal-900",
     },
     {
       title: "Voter Reports",
       description: "Generate and view voter reports",
       icon: BarChart3,
       path: "/voter-report",
-      bgColor: "bg-purple-400 hover:bg-purple-500",
+      cardClass: "dashboard-card-purple",
+      iconBg: "bg-purple-600/80",
       iconColor: "text-white",
       textColor: "text-white",
     },
@@ -203,18 +207,18 @@ const Dashboard = () => {
               {navigationItems.map((item) => (
                 <div
                   key={item.title}
-                  className={`${item.bgColor} rounded-2xl p-8 cursor-pointer transition-all duration-200 hover:scale-105 shadow-lg`}
+                  className={`${item.cardClass} rounded-2xl p-8 cursor-pointer transition-all duration-200 hover:scale-105 shadow-lg`}
                   onClick={() => handleTileClick(item.path)}
                 >
-                  <div className="flex flex-col items-center text-center space-y-4">
-                    <div className="p-4 rounded-full bg-white/20">
+                  <div className="flex flex-col items-center text-center space-y-4 relative z-10">
+                    <div className={`p-4 rounded-full ${item.iconBg} backdrop-blur-sm border border-white/20`}>
                       <item.icon className={`h-12 w-12 ${item.iconColor}`} />
                     </div>
                     <div>
-                      <h3 className={`text-2xl font-bold ${item.textColor} mb-2`}>
+                      <h3 className={`text-2xl font-bold ${item.textColor} mb-2 drop-shadow-sm`}>
                         {item.title}
                       </h3>
-                      <p className={`${item.textColor} opacity-80`}>
+                      <p className={`${item.textColor} opacity-90 drop-shadow-sm`}>
                         {item.description}
                       </p>
                     </div>
