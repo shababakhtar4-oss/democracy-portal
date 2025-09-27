@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Printer, Search, Filter, Download, Monitor, Tablet } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import DetailPageLayout from "@/components/layout/DetailPageLayout";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { apiRequest } from '@/lib/utils';
 
 interface VoterRecord {
   id: string;
@@ -151,28 +152,108 @@ const VoterList = () => {
     printEnabled: false
   });
   const [open, setOpen] = useState(false);
+  const [voterData, setVoterData] = useState([]);
   const [selectedHouse, setSelectedHouse] = useState<string | null>(null);
-
+  const userData = localStorage.getItem("user");
+  const token = userData ? JSON.parse(userData).token : null;
   const cities = useMemo(() => {
     const uniqueCities = [...new Set(mockVoterData.map(voter => voter.city))];
     return uniqueCities;
   }, []);
 
+ useEffect(() => {
+    const fetchVoters = async () => {
+      try {
+        const response = await apiRequest<any>(
+          "https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/api/voters/presearch?pageSize=50",
+          {
+            method: "GET",
+            headers: token
+              ? {
+                  Authorization: `Bearer ${token}`,
+                }
+              : undefined,
+          }
+        );
+        setVoterData(response);
+      } catch (error) {
+        console.error("Failed to fetch voters:", error);
+      }
+    };
+
+    fetchVoters();
+  }, [token]);
+
+  const handleApiSearch = async () => {
+    // setLoading(true);
+    try {
+      const userData = localStorage.getItem("user");
+      const token = userData ? JSON.parse(userData).token : null;
+      // Replace with your actual API endpoint
+      const response = await apiRequest<any>(
+        "https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/api/voters/search",
+        {
+          method: "POST",
+          body: JSON.stringify({ name: filters.name }),
+          headers: token
+            ? {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              }
+            : {
+                "Content-Type": "application/json",
+              },
+        }
+      );
+      // Handle response (e.g., set filteredVoters state if using API data)
+      // setFilteredVoters(response.data);
+      // For now, just log:
+      setVoterData(response);
+      console.log("API search result:", response);
+    } catch (error) {
+      // Handle error (show toast, etc.)
+      console.error("API search failed:", error);
+    } finally {
+      // setLoading(false);
+      console.log("API search completed");
+      
+    }
+  };
+
   const filteredVoters = useMemo(() => {
-    return mockVoterData.filter(voter => {
-      if (filters.name && !voter.name.toLowerCase().includes(filters.name.toLowerCase())) return false;
-      if (filters.ageMin && voter.age < parseInt(filters.ageMin)) return false;
-      if (filters.ageMax && voter.age > parseInt(filters.ageMax)) return false;
-      if (filters.gender && filters.gender !== 'all' && voter.gender !== filters.gender) return false;
-      if (filters.boothNo && voter.boothNo !== parseInt(filters.boothNo)) return false;
-      if (filters.city && filters.city !== 'all' && voter.city !== filters.city) return false;
-      if (filters.houseNo && !voter.houseNo.toLowerCase().includes(filters.houseNo.toLowerCase())) return false;
-      if (filters.relatedTo && !voter.relatedTo.toLowerCase().includes(filters.relatedTo.toLowerCase())) return false;
-      if (filters.mobileAvailable && !voter.mobile) return false;
-      if (filters.printEnabled && !voter.isPrint) return false;
-      return true;
-    });
-  }, [filters]);
+      return mockVoterData.filter(voter => {
+    // Enhanced search: check if the search term is in any visible field
+    const search = filters.name.trim().toLowerCase();
+    if (search) {
+      const haystack = [
+        voter.name,
+        voter.voterIdNumber,
+        voter.mobile,
+        voter.houseNo,
+        voter.relatedTo,
+        voter.city,
+        voter.boothAddress,
+        voter.boothNo?.toString(),
+        voter.gender,
+        voter.age?.toString(),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      if (!haystack.includes(search)) return false;
+    }
+    if (filters.ageMin && voter.age < parseInt(filters.ageMin)) return false;
+    if (filters.ageMax && voter.age > parseInt(filters.ageMax)) return false;
+    if (filters.gender && filters.gender !== 'all' && voter.gender !== filters.gender) return false;
+    if (filters.boothNo && voter.boothNo !== parseInt(filters.boothNo)) return false;
+    if (filters.city && filters.city !== 'all' && voter.city !== filters.city) return false;
+    if (filters.houseNo && !voter.houseNo.toLowerCase().includes(filters.houseNo.toLowerCase())) return false;
+    if (filters.relatedTo && !voter.relatedTo.toLowerCase().includes(filters.relatedTo.toLowerCase())) return false;
+    if (filters.mobileAvailable && !voter.mobile) return false;
+    if (filters.printEnabled && !voter.isPrint) return false;
+    return true;
+  });
+}, [filters]);
 
   const handlegroupPrint = () => {
   if (!selectedHouse) return;
@@ -405,11 +486,10 @@ const VoterList = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 mb-4">
-                <Search className="h-5 w-5" />
-                Voter Records ({filteredVoters.length})
+                Voter Records ({voterData?.length})
               </CardTitle>
               {/* Enhanced Search Box */}
-              <div className="relative">
+              <div className="relative flex items-center gap-5">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by name, voter ID, or mobile number..."
@@ -417,11 +497,21 @@ const VoterList = () => {
                   onChange={(e) => setFilters(prev => ({ ...prev, name: e.target.value }))}
                   className="pl-10 h-12 text-base bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 focus:border-purple-400 focus:bg-white transition-all duration-300"
                 />
+              <Button
+                  type="button"
+                  variant="default"
+                  className="h-12 px-6"
+                  onClick={handleApiSearch}
+                  // disabled={loading || !filters.name.trim()}
+                >
+                  {/* {loading ? "Searching..." : "Search"} */}
+                  Search
+                </Button>
               </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {filteredVoters.map((voter) => (
+                {voterData?.map((voter) => (
                   <Card
                     key={voter.id}
                     className="group relative overflow-hidden bg-gradient-to-br from-white to-gray-50/80 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
@@ -503,10 +593,9 @@ const VoterList = () => {
                       {/* Action Buttons */}
                       <div className="flex gap-2 mt-5 pt-4 border-t border-gray-100">
                         <Button
-                          variant={voter.isPrint ? "default" : "secondary"}
+                          variant={"default"}
                           size="sm"
                           onClick={() => handlePrint(voter)}
-                          disabled={!voter.isPrint}
                           className="flex-1 flex items-center justify-center gap-2 font-medium"
                         >
                           <Printer className="h-4 w-4" />
@@ -516,7 +605,6 @@ const VoterList = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => handleGroupByClick(voter.houseNo)}
-                          disabled={!voter.isPrint}
                           className="flex-1 flex items-center justify-center gap-2 font-medium bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100 hover:border-teal-300 disabled:bg-gray-50 disabled:border-gray-200 disabled:text-gray-400"
                         >
                           <Monitor className="h-4 w-4" />

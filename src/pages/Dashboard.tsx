@@ -40,8 +40,8 @@ const Dashboard = () => {
     {
       title: "Activation Code",
       value: userData?.activationCode || "AXC134",
-      subtitle: "Overview of Last month",
-      progress: 60,
+      subtitle: "Share this code to users",
+      progress: 100,
       progressColor: "hsl(254 73% 58%)",
     },
     {

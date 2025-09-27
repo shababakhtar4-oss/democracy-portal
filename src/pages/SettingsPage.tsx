@@ -5,18 +5,19 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Globe, UploadCloud } from "lucide-react";
 import { useState, ChangeEvent } from "react";
+import { apiRequest } from "@/lib/utils";
 
 const fieldOptions = [
   { key: "name", label: "Name" },
   { key: "age", label: "Age" },
-  { key: "sex", label: "Sex" },
+  { key: "gender", label: "gender" },
   { key: "boothAddress", label: "Booth Address" },
-  { key: "houseNumber", label: "House Number" },
+  { key: "houseNo", label: "House Number" },
   { key: "mobileNumber", label: "Mobile Number" },
   { key: "relatedTo", label: "Related To" },
-  { key: "area", label: "Area" },
+  { key: "partNo", label: "PartNo" },
   { key: "city", label: "City" },
-  { key: "epicNumber", label: "EPIC Number" },
+  { key: "voterIdNumber", label: "Voter Id" },
 ];
 
 const SettingsPage = () => {
@@ -36,10 +37,42 @@ const SettingsPage = () => {
     }));
   };
 
-  const handleSave = () => {
-    localStorage.setItem("visibleFields", JSON.stringify(checkedFields));
-    alert("Settings saved!");
-  };
+  const handleSave = async () => {
+  localStorage.setItem("visibleFields", JSON.stringify(checkedFields));
+  try {
+    // Replace with your actual API endpoint
+      const userData = localStorage.getItem("user");
+    const token = userData ? JSON.parse(userData).token : null;
+
+    // const formData = new FormData();
+    // formData.append("visibleFields", JSON.stringify(checkedFields));
+    // Attach image file if present
+    // const fileInput = document.getElementById("profile-image-upload") as HTMLInputElement;
+    // if (fileInput && fileInput.files && fileInput.files[0]) {
+    //   formData.append("profileImage", fileInput.files[0]);
+    // }
+
+    await apiRequest(
+      "https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/api/config",
+      {
+        method: "POST",
+        headers: token
+          ? {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            }
+          : {
+              "Content-Type": "application/json",
+            },
+        body: JSON.stringify(checkedFields),
+      }
+    );
+    alert("Settings saved and sent to server!");
+  } catch (error) {
+    alert("Failed to save settings to server.");
+  }
+};
+
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

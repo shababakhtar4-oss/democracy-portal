@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DetailPageLayout from "@/components/layout/DetailPageLayout";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiRequest } from "@/lib/utils";
 
 interface User {
   name: string;
@@ -27,7 +28,36 @@ const recentLogins: RecentLogin[] = [
 
 const RecentLogins = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [recentLogins, setRecentLogins] = useState<any>([]);
   const navigate = useNavigate();
+
+   useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    // Fetch recent logins from API on load
+    const fetchRecentLogins = async () => {
+      try {
+        const token = JSON.parse(storedUser).token;
+        const response = await apiRequest<any[]>(
+          `https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/api/searchUsers?activationCode=${JSON.parse(storedUser).activationCode}`,
+          {
+            method: "GET",
+            headers: token
+              ? { 
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json"
+                }
+              : { "Content-Type": "application/json" },
+          }
+        );
+        setRecentLogins(response);
+      } catch (error) {
+        // Optionally handle error
+        setRecentLogins([]);
+      }
+    };
+
+    fetchRecentLogins();
+  }, []);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -63,7 +93,7 @@ const RecentLogins = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {recentLogins.map((login) => (
+            {recentLogins?.users?.map((login) => (
               <div
                 key={login.id}
                 className="cursor-pointer outline-none focus:ring-2 focus:ring-civic-primary rounded transition-shadow hover:shadow-lg"
@@ -78,13 +108,13 @@ const RecentLogins = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-base">
                       <Smartphone className="h-4 w-4 text-civic-primary" />
-                      {login.device}
+                      {login.username}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-xs text-muted-foreground mb-1">{login.timestamp}</div>
-                    <div className="text-xs text-muted-foreground">{login.ipAddress}</div>
-                    <div className="text-xs text-muted-foreground">{login.location}</div>
+                    <div className="text-xs text-muted-foreground mb-1">{`UserName : ${login.username}`}</div>
+                    <div className="text-xs text-muted-foreground">{`Mobile: ${login.mobileNumber}`}</div>
+                    <div className="text-xs text-muted-foreground">{`User Id: ${login.userId}`}</div>
                   </CardContent>
                 </Card>
               </div>
