@@ -399,140 +399,9 @@ const VoterList = () => {
 
   return (
     <DetailPageLayout title="Voter Records">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Filters Sidebar */}
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Filter className="h-5 w-5" />
-                Filters
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Name</label>
-                <Input
-                  placeholder="Search by name..."
-                  value={filters.name}
-                  onChange={(e) => setFilters(prev => ({ ...prev, name: e.target.value }))}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Min Age</label>
-                  <Input
-                    type="number"
-                    placeholder="Min"
-                    value={filters.ageMin}
-                    onChange={(e) => setFilters(prev => ({ ...prev, ageMin: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Max Age</label>
-                  <Input
-                    type="number"
-                    placeholder="Max"
-                    value={filters.ageMax}
-                    onChange={(e) => setFilters(prev => ({ ...prev, ageMax: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">Gender</label>
-                <Select value={filters.gender} onValueChange={(value) => setFilters(prev => ({ ...prev, gender: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select gender" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="Male">Male</SelectItem>
-                    <SelectItem value="Female">Female</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">Booth Number</label>
-                <Input
-                  type="number"
-                  placeholder="Enter booth number"
-                  value={filters.boothNo}
-                  onChange={(e) => setFilters(prev => ({ ...prev, boothNo: e.target.value }))}
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">City</label>
-                <Select value={filters.city} onValueChange={(value) => setFilters(prev => ({ ...prev, city: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select city" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Cities</SelectItem>
-                    {cities.map(city => (
-                      <SelectItem key={city} value={city}>{city}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">House Number</label>
-                <Input
-                  placeholder="Search house number"
-                  value={filters.houseNo}
-                  onChange={(e) => setFilters(prev => ({ ...prev, houseNo: e.target.value }))}
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">Related To</label>
-                <Input
-                  placeholder="Search related to"
-                  value={filters.relatedTo}
-                  onChange={(e) => setFilters(prev => ({ ...prev, relatedTo: e.target.value }))}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="mobile"
-                    checked={filters.mobileAvailable}
-                    onCheckedChange={(checked) => setFilters(prev => ({ ...prev, mobileAvailable: checked as boolean }))}
-                  />
-                  <label htmlFor="mobile" className="text-sm">Mobile Available</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="print"
-                    checked={filters.printEnabled}
-                    onCheckedChange={(checked) => setFilters(prev => ({ ...prev, printEnabled: checked as boolean }))}
-                  />
-                  <label htmlFor="print" className="text-sm">Print Enabled</label>
-                </div>
-              </div>
-
-              <Button 
-                variant="outline" 
-                onClick={() => setFilters({
-                  name: '', ageMin: '', ageMax: '', gender: '', boothNo: '',
-                  city: '', houseNo: '', relatedTo: '', mobileAvailable: false, printEnabled: false
-                })}
-                className="w-full"
-              >
-                Clear Filters
-              </Button>
-            </CardContent>
-          </Card>
-
-        </div>
-
+      <div className="w-full">
         {/* Voter Records List */}
-        <div className="lg:col-span-3">
+        <div className="w-full">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 mb-4">
@@ -551,7 +420,7 @@ const VoterList = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {filteredVoters.map((voter) => (
                   <Card
                     key={voter.id}
