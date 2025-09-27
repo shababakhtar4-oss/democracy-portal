@@ -533,9 +533,25 @@ const VoterList = () => {
 
         {/* Voter Records List */}
         <div className="lg:col-span-3">
-          <div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 mb-4">
+                <Search className="h-5 w-5" />
+                Voter Records ({filteredVoters.length})
+              </CardTitle>
+              {/* Enhanced Search Box */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, voter ID, or mobile number..."
+                  value={filters.name}
+                  onChange={(e) => setFilters(prev => ({ ...prev, name: e.target.value }))}
+                  className="pl-10 h-12 text-base bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 focus:border-purple-400 focus:bg-white transition-all duration-300"
+                />
+              </div>
+            </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredVoters.map((voter) => (
                   <Card
                     key={voter.id}
@@ -656,7 +672,7 @@ const VoterList = () => {
                 )}
               </div>
             </CardContent>
-          </div>
+          </Card>
         </div>
       </div>
 
