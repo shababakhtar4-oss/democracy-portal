@@ -41,7 +41,7 @@ const SimpleHeader = ({ user }: SimpleHeaderProps) => {
               className="object-cover"
             />
             <AvatarFallback className="bg-white text-purple-600 font-bold">
-              {user.name.charAt(0)}
+              {user.name?.charAt(0) || '?'}
             </AvatarFallback>
           </Avatar>
           <Button 
