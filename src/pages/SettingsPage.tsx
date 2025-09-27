@@ -5,7 +5,9 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Globe, UploadCloud } from "lucide-react";
 import { useState, ChangeEvent } from "react";
-import { apiRequest } from "@/lib/utils";
+import { useAppSelector, useAppDispatch } from "@/hooks/redux";
+import { useSaveConfigMutation } from "@/store/api/apiSlice";
+import { updateVisibleField, setProfileImage } from "@/store/slices/settingsSlice";
 
 const fieldOptions = [
   { key: "name", label: "Name" },
@@ -21,57 +23,23 @@ const fieldOptions = [
 ];
 
 const SettingsPage = () => {
-  const [checkedFields, setCheckedFields] = useState<Record<string, boolean>>(
-    () =>
-      fieldOptions.reduce((acc, field) => {
-        acc[field.key] = true; // default: all checked
-        return acc;
-      }, {} as Record<string, boolean>)
-  );
+  const dispatch = useAppDispatch();
+  const { visibleFields } = useAppSelector((state) => state.settings);
+  const [saveConfig] = useSaveConfigMutation();
   const [image, setImage] = useState<string | null>(null);
 
   const handleCheckboxChange = (key: string) => {
-    setCheckedFields((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+    dispatch(updateVisibleField({ key, value: !visibleFields[key] }));
   };
 
   const handleSave = async () => {
-  localStorage.setItem("visibleFields", JSON.stringify(checkedFields));
-  try {
-    // Replace with your actual API endpoint
-      const userData = localStorage.getItem("user");
-    const token = userData ? JSON.parse(userData).token : null;
-
-    // const formData = new FormData();
-    // formData.append("visibleFields", JSON.stringify(checkedFields));
-    // Attach image file if present
-    // const fileInput = document.getElementById("profile-image-upload") as HTMLInputElement;
-    // if (fileInput && fileInput.files && fileInput.files[0]) {
-    //   formData.append("profileImage", fileInput.files[0]);
-    // }
-
-    await apiRequest(
-      "https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/api/config",
-      {
-        method: "POST",
-        headers: token
-          ? {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            }
-          : {
-              "Content-Type": "application/json",
-            },
-        body: JSON.stringify(checkedFields),
-      }
-    );
-    alert("Settings saved and sent to server!");
-  } catch (error) {
-    alert("Failed to save settings to server.");
-  }
-};
+    try {
+      await saveConfig(visibleFields).unwrap();
+      alert("Settings saved successfully!");
+    } catch (error) {
+      alert("Failed to save settings.");
+    }
+  };
 
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -140,7 +108,7 @@ const SettingsPage = () => {
                   <div key={field.key} className="flex items-center space-x-2">
                     <Checkbox
                       id={field.key}
-                      checked={checkedFields[field.key]}
+                      checked={visibleFields[field.key]}
                       onCheckedChange={() => handleCheckboxChange(field.key)}
                     />
                     <Label htmlFor={field.key}>{field.label}</Label>

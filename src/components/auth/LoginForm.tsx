@@ -6,16 +6,20 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Vote, UserPlus } from "lucide-react";
-import { apiRequest } from "@/lib/utils";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux";
+import { useLoginMutation } from "@/store/api/apiSlice";
+import { loginStart, loginSuccess, loginFailure } from "@/store/slices/authSlice";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [activationcode, setActivationcode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const dispatch = useAppDispatch();
+  const { loading } = useAppSelector((state) => state.auth);
+  const [login] = useLoginMutation();
 
   // const validateEmail = (email: string) => {
   //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -34,51 +38,46 @@ const LoginForm = () => {
       return;
     }
 
-    if (!email) {
-      toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address",
-        variant: "destructive",
-      });
-      return;
-    }
-        if (!activationcode.trim()) {
+    if (!activationcode.trim()) {
       toast({
         title: "Validation Error",
         description: "Activation Code is required",
         variant: "destructive"
       });
-      return false;
+      return;
     }
 
-    setIsLoading(true);
+    dispatch(loginStart());
 
-    // Mock authentication - accept any valid email/password
     try {
-    // Replace with your actual API endpoint
-    const data = await apiRequest<{ name: string; email: string; activationCode: string }>(
-      `https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/auth/login?identifier=${email}&password=${password}&activationCode=${activationcode}`,
-      {
-        method: "POST",
-      }
-    );
+      const data = await login({
+        identifier: email,
+        password: password,
+        activationCode: activationcode,
+      }).unwrap();
 
-    localStorage.setItem("user", JSON.stringify(data));
+      dispatch(loginSuccess({
+        name: data.username,
+        email: email,
+        role: data.role,
+        activationCode: data.activationCode,
+        token: data.token,
+        username: data.username,
+      }));
 
-    toast({
-      title: "Login Successful",
-      description: "Welcome to Chunaav!",
-    });
+      toast({
+        title: "Login Successful",
+        description: "Welcome to Chunaav!",
+      });
 
-    navigate("/dashboard");
-  } catch (error: any) {
-    toast({
-      title: "Login Failed",
-      description: error.message || "Invalid credentials. Please try again.",
-      variant: "destructive",
-    });
-  } finally {
-      setIsLoading(false);
+      navigate("/dashboard");
+    } catch (error: any) {
+      dispatch(loginFailure());
+      toast({
+        title: "Login Failed",
+        description: error.message || "Invalid credentials. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -149,9 +148,9 @@ const LoginForm = () => {
             <Button
               type="submit"
               className="w-full bg-gradient-primary hover:opacity-90 transition-opacity"
-              disabled={isLoading}
+              disabled={loading}
             >
-              {isLoading ? "Signing in..." : "Sign In"}
+              {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
           

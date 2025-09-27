@@ -8,7 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import DetailPageLayout from "@/components/layout/DetailPageLayout";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
-import { apiRequest } from '@/lib/utils';
+import { useAppSelector, useAppDispatch } from "@/hooks/redux";
+import { useGetVoterReportQuery } from "@/store/api/apiSlice";
+import { setSearchTerm, setUsers, setLoading } from "@/store/slices/votersSlice";
 
 interface VoterRecord {
   id: string;
@@ -23,9 +25,12 @@ interface VoterRecord {
   city: string;
   relatedTo: string;
   isPrint: boolean;
+  userId?: string;
+  username?: string;
+  mobileNumber?: string;
 }
 
-
+// Mock data for fallback
 const mockVoterData: VoterRecord[] = [
   {
     id: '1',
@@ -82,52 +87,10 @@ const mockVoterData: VoterRecord[] = [
     city: 'DELHI',
     relatedTo: 'ramesh singh',
     isPrint: true
-  },
-    {
-    id: '5',
-    name: 'radha',
-    age: 45,
-    gender: 'Female',
-    voterIdNumber: 'DLH9876543',
-    boothAddress: 'COMMUNITY CENTER, JANAKPURI, NEW DELHI-110058',
-    boothNo: 104,
-    mobile: '9988776655',
-    houseNo: 'C-789',
-    city: 'DELHI',
-    relatedTo: 'ramesh singh',
-    isPrint: true
-  },
-    {
-    id: '6',
-    name: 'neena devi',
-    age: 45,
-    gender: 'Female',
-    voterIdNumber: 'DLH9876543',
-    boothAddress: 'COMMUNITY CENTER, JANAKPURI, NEW DELHI-110058',
-    boothNo: 104,
-    mobile: '9988776655',
-    houseNo: 'C-789',
-    city: 'DELHI',
-    relatedTo: 'ramesh singh',
-    isPrint: true
-  },
-    {
-    id: '7',
-    name: 'manju devi',
-    age: 45,
-    gender: 'Female',
-    voterIdNumber: 'DLH9876543',
-    boothAddress: 'COMMUNITY CENTER, JANAKPURI, NEW DELHI-110058',
-    boothNo: 104,
-    mobile: '9988776655',
-    houseNo: 'C-789',
-    city: 'DELHI',
-    relatedTo: 'ramesh singh',
-    isPrint: true
   }
 ];
 
-const groupByHouseNumber = (voters: typeof mockVoterData) => {
+const groupByHouseNumber = (voters: VoterRecord[]) => {
   const groups: Record<string, VoterRecord[]> = {};
   voters.forEach((voter) => {
     if (!groups[voter.houseNo]) {
@@ -152,291 +115,90 @@ const VoterList = () => {
     printEnabled: false
   });
   const [open, setOpen] = useState(false);
-  const [voterData, setVoterData] = useState([]);
   const [selectedHouse, setSelectedHouse] = useState<string | null>(null);
-  const userData = localStorage.getItem("user");
-  const token = userData ? JSON.parse(userData).token : null;
+  
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
+  const { searchTerm, filteredUsers, loading } = useAppSelector((state) => state.voters);
+  
+  // Use RTK Query for API data
+  const { data: apiVoterData, isLoading: isApiLoading } = useGetVoterReportQuery(
+    { activationCode: user?.activationCode || '' },
+    { skip: !user?.activationCode }
+  );
+
   const cities = useMemo(() => {
     const uniqueCities = [...new Set(mockVoterData.map(voter => voter.city))];
     return uniqueCities;
   }, []);
 
- useEffect(() => {
-    const fetchVoters = async () => {
-      try {
-        const response = await apiRequest<any>(
-          "https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/api/voters/presearch?pageSize=50",
-          {
-            method: "GET",
-            headers: token
-              ? {
-                  Authorization: `Bearer ${token}`,
-                }
-              : undefined,
-          }
-        );
-        setVoterData(response);
-      } catch (error) {
-        console.error("Failed to fetch voters:", error);
-      }
-    };
-
-    fetchVoters();
-  }, [token]);
+  useEffect(() => {
+    if (apiVoterData?.users) {
+      const mappedUsers = apiVoterData.users.map((user: any) => ({
+        id: user.userId,
+        userId: user.userId,
+        name: user.name,
+        username: user.username,
+        mobile: user.mobileNumber,
+        mobileNumber: user.mobileNumber,
+        age: 30, // Default age since not provided by API
+        gender: 'Male' as const, // Default gender
+        voterIdNumber: `VID${user.userId.slice(-6)}`, // Generate voter ID
+        boothAddress: 'Address not available',
+        boothNo: 101,
+        houseNo: '',
+        city: 'DELHI',
+        relatedTo: '',
+        isPrint: true
+      }));
+      dispatch(setUsers(mappedUsers));
+    }
+  }, [apiVoterData, dispatch]);
 
   const handleApiSearch = async () => {
-    // setLoading(true);
-    try {
-      const userData = localStorage.getItem("user");
-      const token = userData ? JSON.parse(userData).token : null;
-      // Replace with your actual API endpoint
-      const response = await apiRequest<any>(
-        "https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/api/voters/search",
-        {
-          method: "POST",
-          body: JSON.stringify({ name: filters.name }),
-          headers: token
-            ? {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              }
-            : {
-                "Content-Type": "application/json",
-              },
-        }
-      );
-      // Handle response (e.g., set filteredVoters state if using API data)
-      // setFilteredVoters(response.data);
-      // For now, just log:
-      setVoterData(response);
-      console.log("API search result:", response);
-    } catch (error) {
-      // Handle error (show toast, etc.)
-      console.error("API search failed:", error);
-    } finally {
-      // setLoading(false);
-      console.log("API search completed");
-      
-    }
+    dispatch(setLoading(true));
+    // The search will be handled by RTK Query automatically
+    dispatch(setLoading(false));
   };
 
-  const filteredVoters = useMemo(() => {
-      return mockVoterData.filter(voter => {
-    // Enhanced search: check if the search term is in any visible field
-    const search = filters.name.trim().toLowerCase();
-    if (search) {
-      const haystack = [
-        voter.name,
-        voter.voterIdNumber,
-        voter.mobile,
-        voter.houseNo,
-        voter.relatedTo,
-        voter.city,
-        voter.boothAddress,
-        voter.boothNo?.toString(),
-        voter.gender,
-        voter.age?.toString(),
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      if (!haystack.includes(search)) return false;
-    }
-    if (filters.ageMin && voter.age < parseInt(filters.ageMin)) return false;
-    if (filters.ageMax && voter.age > parseInt(filters.ageMax)) return false;
-    if (filters.gender && filters.gender !== 'all' && voter.gender !== filters.gender) return false;
-    if (filters.boothNo && voter.boothNo !== parseInt(filters.boothNo)) return false;
-    if (filters.city && filters.city !== 'all' && voter.city !== filters.city) return false;
-    if (filters.houseNo && !voter.houseNo.toLowerCase().includes(filters.houseNo.toLowerCase())) return false;
-    if (filters.relatedTo && !voter.relatedTo.toLowerCase().includes(filters.relatedTo.toLowerCase())) return false;
-    if (filters.mobileAvailable && !voter.mobile) return false;
-    if (filters.printEnabled && !voter.isPrint) return false;
-    return true;
-  });
-}, [filters]);
-
-  const handlegroupPrint = () => {
-  if (!selectedHouse) return;
-  const voters = groups[selectedHouse] || [];
-  const printWindow = window.open('', '_blank');
-  if (printWindow) {
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Voters in House No: ${selectedHouse}</title>
-          <style>
-            body { 
-              font-family: Arial, sans-serif; 
-              padding: 20px; 
-              line-height: 1.4;
-              background-color: #f8f9fa;
-            }
-            h2 { 
-              text-align: center; 
-              color: #333;
-              margin-bottom: 30px;
-              padding-bottom: 10px;
-              border-bottom: 2px solid #007bff;
-            }
-            .voter-card {
-              background: white;
-              border-radius: 8px;
-              padding: 20px;
-              margin-bottom: 20px;
-              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-              border-left: 4px solid #007bff;
-            }
-            .voter-header {
-              background: linear-gradient(135deg, #007bff, #6610f2);
-              color: white;
-              padding: 15px;
-              border-radius: 6px;
-              margin-bottom: 15px;
-            }
-            .voter-name {
-              font-size: 18px;
-              font-weight: bold;
-              margin: 0;
-            }
-            .voter-details {
-              font-size: 14px;
-              opacity: 0.9;
-            }
-            .info-grid {
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: 15px;
-              margin-bottom: 15px;
-            }
-            .info-item {
-              background: #f8f9fa;
-              padding: 12px;
-              border-radius: 6px;
-              border-left: 3px solid #28a745;
-            }
-            .info-label {
-              font-size: 11px;
-              font-weight: bold;
-              color: #666;
-              text-transform: uppercase;
-              margin-bottom: 4px;
-            }
-            .info-value {
-              font-size: 14px;
-              color: #333;
-              font-weight: 600;
-            }
-            .voter-id {
-              background: #e3f2fd;
-              border: 1px solid #2196f3;
-              padding: 12px;
-              border-radius: 6px;
-              margin-bottom: 15px;
-              text-align: center;
-            }
-            .voter-id-label {
-              font-size: 12px;
-              color: #1976d2;
-              font-weight: bold;
-              margin-bottom: 4px;
-            }
-            .voter-id-value {
-              font-size: 16px;
-              color: #0d47a1;
-              font-weight: bold;
-            }
-            .booth-address {
-              background: #fff3e0;
-              border: 1px solid #ff9800;
-              padding: 12px;
-              border-radius: 6px;
-              margin-top: 15px;
-            }
-            .booth-label {
-              font-size: 11px;
-              color: #f57c00;
-              font-weight: bold;
-              margin-bottom: 6px;
-            }
-            .booth-text {
-              font-size: 13px;
-              color: #e65100;
-              line-height: 1.4;
-            }
-            .mobile-info {
-              background: #f3e5f5;
-              border: 1px solid #9c27b0;
-              padding: 12px;
-              border-radius: 6px;
-              text-align: center;
-            }
-            .no-mobile {
-              background: #fafafa;
-              border: 1px solid #bdbdbd;
-              color: #757575;
-            }
-            @media print {
-              .voter-card {
-                page-break-inside: avoid;
-                margin-bottom: 30px;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          <h2>Voters in House No: ${selectedHouse}</h2>
-          ${voters
-            .map(
-              v =>
-                `<div class="voter-card">
-                  <div class="voter-header">
-                    <div class="voter-name">${v.name}</div>
-                    <div class="voter-details">${v.gender} • ${v.age} years old</div>
-                  </div>
-                  
-                  <div class="voter-id">
-                    <div class="voter-id-label">VOTER ID NUMBER</div>
-                    <div class="voter-id-value">${v.voterIdNumber}</div>
-                  </div>
-                  
-                  <div class="info-grid">
-                    <div class="info-item">
-                      <div class="info-label">Related To</div>
-                      <div class="info-value">${v.relatedTo}</div>
-                    </div>
-                    <div class="info-item">
-                      <div class="info-label">House No</div>
-                      <div class="info-value">${v.houseNo || 'Not Available'}</div>
-                    </div>
-                    <div class="info-item">
-                      <div class="info-label">City</div>
-                      <div class="info-value">${v.city}</div>
-                    </div>
-                    <div class="info-item">
-                      <div class="info-label">Booth No</div>
-                      <div class="info-value">${v.boothNo}</div>
-                    </div>
-                  </div>
-                  
-                  <div class="mobile-info ${v.mobile ? '' : 'no-mobile'}">
-                    <div class="info-label">Mobile Number</div>
-                    <div class="info-value">${v.mobile || 'Not Available'}</div>
-                  </div>
-                  
-                  <div class="booth-address">
-                    <div class="booth-label">Booth Address</div>
-                    <div class="booth-text">${v.boothAddress}</div>
-                  </div>
-                </div>`
-            )
-            .join("")}
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.print();
-  }
-};
+  // Filter the voters based on search term and other filters
+  const displayVoters = useMemo(() => {
+    const voters = filteredUsers.length > 0 ? filteredUsers : mockVoterData;
+    
+    return voters.filter(voter => {
+      // Enhanced search: check if the search term is in any visible field
+      const search = searchTerm.trim().toLowerCase();
+      if (search) {
+        const haystack = [
+          voter.name,
+          voter.voterIdNumber,
+          voter.mobile || voter.mobileNumber,
+          voter.houseNo,
+          voter.relatedTo,
+          voter.city,
+          voter.boothAddress,
+          voter.boothNo?.toString(),
+          voter.gender,
+          voter.age?.toString(),
+          voter.username,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        if (!haystack.includes(search)) return false;
+      }
+      if (filters.ageMin && voter.age < parseInt(filters.ageMin)) return false;
+      if (filters.ageMax && voter.age > parseInt(filters.ageMax)) return false;
+      if (filters.gender && filters.gender !== 'all' && voter.gender !== filters.gender) return false;
+      if (filters.boothNo && voter.boothNo !== parseInt(filters.boothNo)) return false;
+      if (filters.city && filters.city !== 'all' && voter.city !== filters.city) return false;
+      if (filters.houseNo && !voter.houseNo.toLowerCase().includes(filters.houseNo.toLowerCase())) return false;
+      if (filters.relatedTo && !voter.relatedTo.toLowerCase().includes(filters.relatedTo.toLowerCase())) return false;
+      if (filters.mobileAvailable && !(voter.mobile || voter.mobileNumber)) return false;
+      if (filters.printEnabled && !voter.isPrint) return false;
+      return true;
+    });
+  }, [searchTerm, filters, filteredUsers]);
 
   const handlePrint = (voter: VoterRecord) => {
     const printWindow = window.open('', '_blank');
@@ -462,7 +224,7 @@ const VoterList = () => {
             <div class="field"><span class="label">House No:</span> ${voter.houseNo || '(blank)'}</div>
             <div class="field"><span class="label">City:</span> ${voter.city}</div>
             <div class="field"><span class="label">Booth:</span> ${voter.boothAddress}</div>
-            <div class="field"><span class="label">Mobile:</span> ${voter.mobile || 'Not available'}</div>
+            <div class="field"><span class="label">Mobile:</span> ${voter.mobile || voter.mobileNumber || 'Not available'}</div>
           </body>
         </html>
       `);
@@ -478,151 +240,159 @@ const VoterList = () => {
     setOpen(true);
   };
 
+  const handlegroupPrint = () => {
+    if (!selectedHouse) return;
+    const voters = groups[selectedHouse] || [];
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Voters in House No: ${selectedHouse}</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              .voter-card { border: 1px solid #ccc; margin: 10px 0; padding: 15px; }
+              .voter-name { font-size: 18px; font-weight: bold; }
+            </style>
+          </head>
+          <body>
+            <h2>Voters in House No: ${selectedHouse}</h2>
+            ${voters.map(v => `
+              <div class="voter-card">
+                <div class="voter-name">${v.name}</div>
+                <div>Gender: ${v.gender}, Age: ${v.age}</div>
+                <div>Voter ID: ${v.voterIdNumber}</div>
+                <div>Mobile: ${v.mobile || 'Not available'}</div>
+                <div>Related To: ${v.relatedTo}</div>
+              </div>
+            `).join('')}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
   return (
     <DetailPageLayout title="Voter Records">
       <div className="w-full">
-        {/* Voter Records List */}
         <div className="w-full">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 mb-4">
-                Voter Records ({voterData?.length})
+                Voter Records ({displayVoters?.length || 0})
               </CardTitle>
               {/* Enhanced Search Box */}
               <div className="relative flex items-center gap-5">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by name, voter ID, or mobile number..."
-                  value={filters.name}
-                  onChange={(e) => setFilters(prev => ({ ...prev, name: e.target.value }))}
+                  value={searchTerm}
+                  onChange={(e) => dispatch(setSearchTerm(e.target.value))}
                   className="pl-10 h-12 text-base bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 focus:border-purple-400 focus:bg-white transition-all duration-300"
                 />
-              <Button
+                <Button
                   type="button"
                   variant="default"
                   className="h-12 px-6"
                   onClick={handleApiSearch}
-                  // disabled={loading || !filters.name.trim()}
                 >
-                  {/* {loading ? "Searching..." : "Search"} */}
                   Search
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {voterData?.map((voter) => (
-                  <Card
-                    key={voter.id}
-                    className="group relative overflow-hidden bg-gradient-to-br from-white to-gray-50/80 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                  >
-                    {/* Header with gradient background */}
-                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 text-white">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-bold text-lg leading-tight">
-                            {voter.name}
-                          </h3>
-                          <p className="text-blue-100 text-sm">
-                            {voter.gender} • {voter.age} years
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <div className="bg-white/20 rounded-lg px-3 py-1">
-                            <p className="text-xs font-medium">Booth</p>
-                            <p className="text-sm font-bold">{voter.boothNo}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-5">
-                      <div className="space-y-3">
-                        {/* Voter ID - Prominent display */}
-                        <div className="bg-gray-50 rounded-lg p-3 border-l-4 border-blue-500">
-                          <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">Voter ID</p>
-                          <p className="text-sm font-bold text-gray-900">{voter.voterIdNumber}</p>
-                        </div>
-
-                        {/* Personal Details */}
-                        <div className="grid grid-cols-2 gap-3">
+                {(loading || isApiLoading) ? (
+                  <div className="col-span-full text-center py-8">Loading voters...</div>
+                ) : (
+                  displayVoters.map((voter) => (
+                    <Card
+                      key={voter.id || voter.userId}
+                      className="group relative overflow-hidden bg-gradient-to-br from-white to-gray-50/80 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                    >
+                      {/* Header with gradient background */}
+                      <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 text-white">
+                        <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-xs text-gray-500 font-medium">Related To</p>
-                            <p className="text-sm font-semibold text-gray-800 capitalize">{voter.relatedTo}</p>
+                            <h3 className="font-bold text-lg leading-tight">
+                              {voter.name}
+                            </h3>
+                            <p className="text-blue-100 text-sm">
+                              {voter.gender} • {voter.age} years
+                            </p>
                           </div>
-                          <div>
-                            <p className="text-xs text-gray-500 font-medium">House No</p>
-                            <p className="text-sm font-semibold text-gray-800">{voter.houseNo || 'N/A'}</p>
-                          </div>
-                        </div>
-
-                        {/* Location Info */}
-                        <div>
-                          <p className="text-xs text-gray-500 font-medium mb-1">Location</p>
-                          <div className="bg-green-50 rounded-lg p-2 border border-green-200">
-                            <p className="text-xs font-semibold text-green-800">{voter.city}</p>
-                          </div>
-                        </div>
-
-                        {/* Contact Info */}
-                        {voter.mobile && (
-                          <div className="flex items-center gap-2 bg-orange-50 rounded-lg p-2 border border-orange-200">
-                            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                            <div>
-                              <p className="text-xs text-orange-700 font-medium">Mobile</p>
-                              <p className="text-sm font-semibold text-orange-800">{voter.mobile}</p>
+                          <div className="text-right">
+                            <div className="bg-white/20 rounded-lg px-3 py-1">
+                              <p className="text-xs font-medium">Booth</p>
+                              <p className="text-sm font-bold">{voter.boothNo}</p>
                             </div>
                           </div>
-                        )}
-                        
-                        {!voter.mobile && (
-                          <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                            <p className="text-xs text-gray-500">No mobile number</p>
-                          </div>
-                        )}
-
-                        {/* Booth Address - Collapsible */}
-                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                          <p className="text-xs text-blue-700 font-medium mb-1">Booth Address</p>
-                          <p className="text-xs text-blue-800 leading-relaxed">{voter.boothAddress}</p>
                         </div>
                       </div>
 
-                      {/* Action Buttons */}
-                      <div className="flex gap-2 mt-5 pt-4 border-t border-gray-100">
-                        <Button
-                          variant={"default"}
-                          size="sm"
-                          onClick={() => handlePrint(voter)}
-                          className="flex-1 flex items-center justify-center gap-2 font-medium"
-                        >
-                          <Printer className="h-4 w-4" />
-                          Print
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleGroupByClick(voter.houseNo)}
-                          className="flex-1 flex items-center justify-center gap-2 font-medium bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100 hover:border-teal-300 disabled:bg-gray-50 disabled:border-gray-200 disabled:text-gray-400"
-                        >
-                          <Monitor className="h-4 w-4" />
-                          Group
-                        </Button>
+                      {/* Content */}
+                      <div className="p-5">
+                        <div className="space-y-3">
+                          {/* Voter ID - Prominent display */}
+                          <div className="bg-gray-50 rounded-lg p-3 border-l-4 border-blue-500">
+                            <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">Voter ID</p>
+                            <p className="text-sm font-bold text-gray-900">{voter.voterIdNumber}</p>
+                          </div>
+
+                          {/* Personal Details */}
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <p className="text-xs text-gray-500 font-medium">Related To</p>
+                              <p className="text-sm font-semibold text-gray-800 capitalize">{voter.relatedTo || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500 font-medium">House No</p>
+                              <p className="text-sm font-semibold text-gray-800">{voter.houseNo || 'N/A'}</p>
+                            </div>
+                          </div>
+
+                          {/* Contact & Location */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <p className="text-xs text-gray-500 font-medium">Mobile</p>
+                              <p className="text-sm font-semibold text-gray-800">
+                                {voter.mobile || voter.mobileNumber || 'Not available'}
+                              </p>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <p className="text-xs text-gray-500 font-medium">City</p>
+                              <p className="text-sm font-semibold text-gray-800">{voter.city}</p>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex gap-2 pt-3 border-t border-gray-100">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1 text-xs"
+                              onClick={() => handlePrint(voter)}
+                            >
+                              <Printer className="h-3 w-3 mr-1" />
+                              Print
+                            </Button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    
-                    {/* Status indicator */}
-                    <div className="absolute top-2 right-2">
-                      <div className={`w-3 h-3 rounded-full ${voter.isPrint ? 'bg-green-400' : 'bg-red-400'}`} 
-                           title={voter.isPrint ? 'Print enabled' : 'Print disabled'}>
+                      
+                      {/* Status indicator */}
+                      <div className="absolute top-2 right-2">
+                        <div className={`w-3 h-3 rounded-full ${voter.isPrint ? 'bg-green-400' : 'bg-red-400'}`} 
+                             title={voter.isPrint ? 'Print enabled' : 'Print disabled'}>
+                        </div>
                       </div>
-                    </div>
-                  </Card>
-                ))}  
-                {filteredVoters.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
+                    </Card>
+                  ))
+                )}
+                {(displayVoters?.length === 0 && !loading && !isApiLoading) && (
+                  <div className="col-span-full text-center py-8 text-muted-foreground">
                     <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
                     <p>No voter records found matching your filters.</p>
                   </div>
@@ -633,26 +403,34 @@ const VoterList = () => {
         </div>
       </div>
 
+      {/* Group Print Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>
-              {selectedHouse ? `Voters in House No: ${selectedHouse}` : "Group By House Number"}
-            </DialogTitle>
+            <DialogTitle>Voters in House No: {selectedHouse}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-2">
-            {selectedHouse &&
-              groups[selectedHouse]?.map((voter, idx) => (
-                <div key={idx} className="flex justify-between border-b py-1 items-center">
-              <span className="flex-1">{voter.name}</span>
-              <span className="flex-1 text-center text-xs text-muted-foreground">{voter.relatedTo}</span>
-              <span className="flex-1 text-right text-xs text-muted-foreground">{voter.voterIdNumber}</span>
-            </div>
-              ))}
+          <div className="max-h-[400px] overflow-y-auto">
+            {selectedHouse && groups[selectedHouse]?.map((voter) => (
+              <div key={voter.id} className="p-3 border-b last:border-b-0">
+                <div className="font-semibold">{voter.name}</div>
+                <div className="text-sm text-gray-600">
+                  {voter.gender}, {voter.age} years • {voter.voterIdNumber}
+                </div>
+                <div className="text-sm text-gray-600">
+                  Mobile: {voter.mobile || 'Not available'}
+                </div>
+              </div>
+            ))}
           </div>
-          <DialogClose asChild>
-            <Button variant="outline" className="mt-4 w-full" onClick = {handlegroupPrint}>Print</Button>
-          </DialogClose>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handlegroupPrint}>
+              <Printer className="h-4 w-4 mr-2" />
+              Print All
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </DetailPageLayout>
