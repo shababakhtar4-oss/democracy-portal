@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate,useLocation } from "react-router-dom";
 import { Shield, Clock, MapPin, Smartphone, Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DetailPageLayout from "@/components/layout/DetailPageLayout";
@@ -17,7 +17,8 @@ interface LoginDetail {
 }
 
 const LoginDetails = () => {
-  const { id } = useParams();
+  const location = useLocation();
+  const lastSegment = location?.pathname?.split('/').pop();
   const navigate = useNavigate();
   const [loginDetails, setLoginDetails] = useState<LoginDetail[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +34,7 @@ const LoginDetails = () => {
 
         const user = JSON.parse(storedUser);
         const response = await apiRequest<LoginDetail[]>(
-          `https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/api/recent-logins?activationCode=${user.activationCode}&username=${user.username}`,
+          `https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/report/total-prints?activationCode=${user.activationCode}&user=${lastSegment}`,
           {
             method: "GET",
             headers: {
@@ -53,7 +54,7 @@ const LoginDetails = () => {
     };
 
     fetchLoginDetails();
-  }, [id, navigate]);
+  }, [lastSegment, navigate]);
 
   if (loading) {
     return (
@@ -74,7 +75,7 @@ const LoginDetails = () => {
         </p>
       </div>
 
-      {loginDetails.length === 0 ? (
+      {loginDetails?.print?.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">
             <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -83,12 +84,12 @@ const LoginDetails = () => {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {loginDetails.map((detail, index) => (
+          {loginDetails?.print?.map((detail, index) => (
             <Card key={index} className="border-civic-primary/30 hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Activity className="h-5 w-5 text-civic-primary" />
-                  Login Session
+                  User Session
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -96,15 +97,15 @@ const LoginDetails = () => {
                   <Smartphone className="h-4 w-4 text-civic-secondary" />
                   <div>
                     <p className="text-sm font-medium">Username</p>
-                    <p className="text-xs text-muted-foreground">{detail.username || "Unknown"}</p>
+                    <p className="text-xs text-muted-foreground">{detail.votername || "Unknown"}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-civic-secondary" />
                   <div>
-                    <p className="text-sm font-medium">IP Address</p>
-                    <p className="text-xs text-muted-foreground">{detail.ipAddress || "127.0.0.1"}</p>
+                    <p className="text-sm font-medium">Voter ID</p>
+                    <p className="text-xs text-muted-foreground">{detail.voteridnumber || "127.0.0.1"}</p>
                   </div>
                 </div>
 
@@ -112,7 +113,7 @@ const LoginDetails = () => {
                   <Smartphone className="h-4 w-4 text-civic-secondary" />
                   <div>
                     <p className="text-sm font-medium">Device</p>
-                    <p className="text-xs text-muted-foreground">{detail.device || "Web Browser"}</p>
+                    <p className="text-xs text-muted-foreground">{detail.device || "Mobile App"}</p>
                   </div>
                 </div>
 

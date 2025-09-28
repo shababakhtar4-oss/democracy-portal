@@ -65,8 +65,8 @@ const RecentLogins = () => {
     return null;
   }
 
-  const handleCardClick = (id: number) => {
-    navigate(`/recent-login/${id}`);
+  const handleCardClick = (name: number) => {
+    navigate(`/recent-login/${name}`);
   };
 
   return (
@@ -92,9 +92,9 @@ const RecentLogins = () => {
                 className="cursor-pointer outline-none focus:ring-2 focus:ring-civic-primary rounded transition-shadow hover:shadow-lg"
                 tabIndex={0}
                 role="button"
-                onClick={() => handleCardClick(login.id)}
+                onClick={() => handleCardClick(login.username)}
                 onKeyDown={e => {
-                  if (e.key === "Enter" || e.key === " ") handleCardClick(login.id);
+                  if (e.key === "Enter" || e.key === " ") handleCardClick(login.username);
                 }}
               >
                 <Card className="h-full border-civic-primary/30">
