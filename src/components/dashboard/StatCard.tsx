@@ -28,10 +28,10 @@ const StatCard = ({
           </div>
           
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
+            {/* <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Monthly</span>
               <span className="text-sm font-medium">{progress}%</span>
-            </div>
+            </div> */}
             <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
               <div 
                 className="h-full transition-all duration-300 rounded-full"

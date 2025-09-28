@@ -19,13 +19,6 @@ interface RecentLogin {
   location: string;
 }
 
-// Mock recent logins data
-const recentLogins: RecentLogin[] = [
-  { id: 1, device: 'Samsung Galaxy S22 - Chrome Mobile', timestamp: '2 hours ago', ipAddress: '192.168.1.15', location: 'Mumbai, India' },
-  { id: 2, device: 'Windows PC - Chrome Desktop', timestamp: '1 day ago', ipAddress: '192.168.1.25', location: 'Mumbai, India' },
-  { id: 3, device: 'iPad Pro - Safari', timestamp: '3 days ago', ipAddress: '192.168.1.35', location: 'Mumbai, India' },
-];
-
 const RecentLogins = () => {
   const [user, setUser] = useState<User | null>(null);
   const [recentLogins, setRecentLogins] = useState<any>([]);

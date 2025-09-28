@@ -38,33 +38,34 @@ const SettingsPage = () => {
   };
 
   const handleSave = async () => {
-  localStorage.setItem("visibleFields", JSON.stringify(checkedFields));
+   localStorage.setItem("visibleFields", JSON.stringify(checkedFields));
   try {
-    // Replace with your actual API endpoint
-      const userData = localStorage.getItem("user");
+    const userData = localStorage.getItem("user");
     const token = userData ? JSON.parse(userData).token : null;
+    const activationCode = userData ? JSON.parse(userData).activationCode : "";
 
-    // const formData = new FormData();
-    // formData.append("visibleFields", JSON.stringify(checkedFields));
-    // Attach image file if present
-    // const fileInput = document.getElementById("profile-image-upload") as HTMLInputElement;
-    // if (fileInput && fileInput.files && fileInput.files[0]) {
-    //   formData.append("profileImage", fileInput.files[0]);
-    // }
+    // Get the image file if present
+    const fileInput = document.getElementById("profile-image-upload") as HTMLInputElement;
+    const imageFile = fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
 
-    await apiRequest(
+    const formData = new FormData();
+    if (imageFile) {
+      formData.append("file", imageFile);
+    }
+    formData.append("activationCode", activationCode);
+    formData.append("config", JSON.stringify(checkedFields));
+
+    await fetch(
       "https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/api/config",
       {
         method: "POST",
         headers: token
           ? {
               Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
+              // Do not set Content-Type for FormData
             }
-          : {
-              "Content-Type": "application/json",
-            },
-        body: JSON.stringify(checkedFields),
+          : undefined,
+        body: formData,
       }
     );
     alert("Settings saved and sent to server!");
@@ -93,7 +94,7 @@ const SettingsPage = () => {
           <CardHeader>
             <CardTitle className="flex items-center text-civic-primary">
               <UploadCloud className="h-5 w-5 mr-2" />
-              Upload Profile Image
+              Upload Banner Image
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -117,9 +118,10 @@ const SettingsPage = () => {
               {image && (
                 <img
                   src={image}
-                  alt="Profile Preview"
-                  className="h-16 w-16 rounded-full object-cover border"
-                />
+                  alt="Banner Preview"
+                  className="h-24 w-auto rounded border"
+                  style={{ objectFit: "contain", background: "#f3f3f3" }}
+                 />
               )}
             </div>
           </CardContent>
@@ -127,31 +129,44 @@ const SettingsPage = () => {
 
         {/* Display Settings */}
         <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center text-civic-primary">
-              <Globe className="h-5 w-5 mr-2" />
-              Display Settings
-            </CardTitle>
-          </CardHeader>
+           <CardHeader>
+    <div className="flex items-center justify-between">
+      <CardTitle className="flex items-center text-civic-primary">
+        <Globe className="h-5 w-5 mr-2" />
+        Display Settings
+      </CardTitle>
+      <Button
+        type="button"
+        className="ml-auto"
+        onClick={handleSave}
+        variant="default"
+      >
+        Save Settings
+      </Button>
+    </div>
+  </CardHeader>
           <CardContent>
-            <form className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {fieldOptions.map((field) => (
-                  <div key={field.key} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={field.key}
-                      checked={checkedFields[field.key]}
-                      onCheckedChange={() => handleCheckboxChange(field.key)}
-                    />
-                    <Label htmlFor={field.key}>{field.label}</Label>
-                  </div>
-                ))}
-              </div>
-              <Button type="button" className="mt-4" onClick={handleSave}>
-                Save Settings
-              </Button>
-            </form>
-          </CardContent>
+    <form className="space-y-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+        {fieldOptions.map((field) => (
+          <div
+            key={field.key}
+            className="flex flex-col items-center space-y-2 p-3 rounded-lg bg-gray-50 border border-gray-200"
+          >
+            <Checkbox
+              id={field.key}
+              checked={checkedFields[field.key]}
+              onCheckedChange={() => handleCheckboxChange(field.key)}
+              className="w-6 h-6 rounded-sm border-gray-400 data-[state=checked]:bg-civic-primary"
+            />
+            <Label htmlFor={field.key} className="text-center text-sm font-medium">
+              {field.label}
+            </Label>
+          </div>
+        ))}
+      </div>
+    </form>
+  </CardContent>
         </Card>
       </div>
     </DetailPageLayout>

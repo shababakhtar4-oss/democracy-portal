@@ -9,8 +9,6 @@ import {
 } from "lucide-react";
 import SimpleHeader from "@/components/layout/SimpleHeader";
 import StatCard from "@/components/dashboard/StatCard";
-import DashboardTile from "@/components/dashboard/DashboardTile";
-import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 
 interface User {
@@ -46,16 +44,16 @@ const Dashboard = () => {
     },
     {
       title: "Total Records", 
-      value: "20,000+",
+      value: "50,000+",
       subtitle: "Overview of Last month",
       progress: 500,
       progressColor: "hsl(168 76% 42%)",
     },
     {
       title: "Constituency Name",
-      value: "Constituency Name",
-      subtitle: "",
-      progress: 0,
+      value: "Okhla",
+      subtitle: "Constituency declared as per ECI data",
+      progress: 1000,
       progressColor: "hsl(197 71% 73%)",
     },
   ];

@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import DetailPageLayout from "@/components/layout/DetailPageLayout";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose,DialogFooter } from "@/components/ui/dialog";
 import { apiRequest } from '@/lib/utils';
 
 interface VoterRecord {
@@ -26,108 +26,7 @@ interface VoterRecord {
 }
 
 
-const mockVoterData: VoterRecord[] = [
-  {
-    id: '1',
-    name: 'md kasim',
-    age: 68,
-    gender: 'Male',
-    voterIdNumber: 'NWD5059084',
-    boothAddress: 'NATIONAL PUBLIC SCHOOL, KALINDI COLONY, MAHARANI BAGH, NEW DELHI-110065',
-    boothNo: 101,
-    mobile: '9119694951',
-    houseNo: '',
-    city: 'DELHI',
-    relatedTo: 'md aziz',
-    isPrint: true
-  },
-  {
-    id: '2',
-    name: 'priya sharma',
-    age: 34,
-    gender: 'Female',
-    voterIdNumber: 'DLH3456789',
-    boothAddress: 'GOVERNMENT SENIOR SECONDARY SCHOOL, LAJPAT NAGAR, NEW DELHI-110024',
-    boothNo: 102,
-    mobile: '9876543210',
-    houseNo: 'A-123',
-    city: 'DELHI',
-    relatedTo: 'raj sharma',
-    isPrint: true
-  },
-  {
-    id: '3',
-    name: 'amit kumar',
-    age: 29,
-    gender: 'Male',
-    voterIdNumber: 'UP1234567',
-    boothAddress: 'PRIMARY SCHOOL, SECTOR 15, NOIDA, UP-201301',
-    boothNo: 103,
-    mobile: '',
-    houseNo: 'B-456',
-    city: 'NOIDA',
-    relatedTo: 'suresh kumar',
-    isPrint: false
-  },
-  {
-    id: '4',
-    name: 'sunita devi',
-    age: 45,
-    gender: 'Female',
-    voterIdNumber: 'DLH9876543',
-    boothAddress: 'COMMUNITY CENTER, JANAKPURI, NEW DELHI-110058',
-    boothNo: 104,
-    mobile: '9988776655',
-    houseNo: 'C-789',
-    city: 'DELHI',
-    relatedTo: 'ramesh singh',
-    isPrint: true
-  },
-    {
-    id: '5',
-    name: 'radha',
-    age: 45,
-    gender: 'Female',
-    voterIdNumber: 'DLH9876543',
-    boothAddress: 'COMMUNITY CENTER, JANAKPURI, NEW DELHI-110058',
-    boothNo: 104,
-    mobile: '9988776655',
-    houseNo: 'C-789',
-    city: 'DELHI',
-    relatedTo: 'ramesh singh',
-    isPrint: true
-  },
-    {
-    id: '6',
-    name: 'neena devi',
-    age: 45,
-    gender: 'Female',
-    voterIdNumber: 'DLH9876543',
-    boothAddress: 'COMMUNITY CENTER, JANAKPURI, NEW DELHI-110058',
-    boothNo: 104,
-    mobile: '9988776655',
-    houseNo: 'C-789',
-    city: 'DELHI',
-    relatedTo: 'ramesh singh',
-    isPrint: true
-  },
-    {
-    id: '7',
-    name: 'manju devi',
-    age: 45,
-    gender: 'Female',
-    voterIdNumber: 'DLH9876543',
-    boothAddress: 'COMMUNITY CENTER, JANAKPURI, NEW DELHI-110058',
-    boothNo: 104,
-    mobile: '9988776655',
-    houseNo: 'C-789',
-    city: 'DELHI',
-    relatedTo: 'ramesh singh',
-    isPrint: true
-  }
-];
-
-const groupByHouseNumber = (voters: typeof mockVoterData) => {
+const groupByHouseNumber = (voters: any) => {
   const groups: Record<string, VoterRecord[]> = {};
   voters.forEach((voter) => {
     if (!groups[voter.houseNo]) {
@@ -154,18 +53,22 @@ const VoterList = () => {
   const [open, setOpen] = useState(false);
   const [voterData, setVoterData] = useState([]);
   const [selectedHouse, setSelectedHouse] = useState<string | null>(null);
+    const [filterOpen, setFilterOpen] = useState(false);
+  const [filterFields, setFilterFields] = useState({
+    name: "",
+    houseNo: "",
+    voterIdNumber: "",
+    relatedTo: "",
+  });
   const userData = localStorage.getItem("user");
   const token = userData ? JSON.parse(userData).token : null;
-  const cities = useMemo(() => {
-    const uniqueCities = [...new Set(mockVoterData.map(voter => voter.city))];
-    return uniqueCities;
-  }, []);
-
+ const groups = useMemo(() => groupByHouseNumber(voterData), [voterData]);
  useEffect(() => {
+  const activationCode = userData ? JSON.parse(userData).activationCode : null;
     const fetchVoters = async () => {
       try {
         const response = await apiRequest<any>(
-          "https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/api/voters/presearch?pageSize=50",
+          `https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/api/voters/presearch?pageSize=50&activationCode=${activationCode}`,
           {
             method: "GET",
             headers: token
@@ -191,10 +94,10 @@ const VoterList = () => {
       const token = userData ? JSON.parse(userData).token : null;
       // Replace with your actual API endpoint
       const response = await apiRequest<any>(
-        "https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/api/voters/search",
+        `https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/api/voters/search?activationCode=${userData ? JSON.parse(userData).activationCode : null}`,
         {
           method: "POST",
-          body: JSON.stringify({ name: filters.name }),
+          body: JSON.stringify({ name: filters.name,activationCode: userData ? JSON.parse(userData).activationCode : null }),
           headers: token
             ? {
                 Authorization: `Bearer ${token}`,
@@ -220,40 +123,64 @@ const VoterList = () => {
     }
   };
 
-  const filteredVoters = useMemo(() => {
-      return mockVoterData.filter(voter => {
-    // Enhanced search: check if the search term is in any visible field
-    const search = filters.name.trim().toLowerCase();
-    if (search) {
-      const haystack = [
-        voter.name,
-        voter.voterIdNumber,
-        voter.mobile,
-        voter.houseNo,
-        voter.relatedTo,
-        voter.city,
-        voter.boothAddress,
-        voter.boothNo?.toString(),
-        voter.gender,
-        voter.age?.toString(),
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      if (!haystack.includes(search)) return false;
-    }
-    if (filters.ageMin && voter.age < parseInt(filters.ageMin)) return false;
-    if (filters.ageMax && voter.age > parseInt(filters.ageMax)) return false;
-    if (filters.gender && filters.gender !== 'all' && voter.gender !== filters.gender) return false;
-    if (filters.boothNo && voter.boothNo !== parseInt(filters.boothNo)) return false;
-    if (filters.city && filters.city !== 'all' && voter.city !== filters.city) return false;
-    if (filters.houseNo && !voter.houseNo.toLowerCase().includes(filters.houseNo.toLowerCase())) return false;
-    if (filters.relatedTo && !voter.relatedTo.toLowerCase().includes(filters.relatedTo.toLowerCase())) return false;
-    if (filters.mobileAvailable && !voter.mobile) return false;
-    if (filters.printEnabled && !voter.isPrint) return false;
-    return true;
+    const filteredUsers = voterData?.filter((login: any) => {
+    const nameMatch = filterFields.name
+      ? login.name?.toLowerCase().includes(filterFields.name.toLowerCase())
+      : true;
+    const houseNoMatch = filterFields.houseNo
+      ? login.houseNo?.toLowerCase().includes(filterFields.houseNo.toLowerCase())
+      : true;
+    const voterIdMatch = filterFields.voterIdNumber
+      ? login.voterIdNumber?.toLowerCase().includes(filterFields.voterIdNumber.toLowerCase())
+      : true;
+    const relatedToMatch = filterFields.relatedTo
+      ? login.relatedTo?.toLowerCase().includes(filterFields.relatedTo.toLowerCase())
+      : true;
+    return nameMatch || houseNoMatch || voterIdMatch || relatedToMatch;
   });
-}, [filters]);
+
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilterFields({ ...filterFields, [e.target.name]: e.target.value });
+  };
+
+  const handleApplyFilters = () => {
+    setFilterOpen(false);
+    // Filtering is handled by filteredUsers
+  };
+
+  const filteredVoters = useMemo(() => {
+      return voterData.filter((voter: any) => {
+      const search = filters.name.trim().toLowerCase();
+      if (search) {
+        const haystack = [
+          voter.name,
+          voter.voterIdNumber,
+          voter.mobile,
+          voter.houseNo,
+          voter.relatedTo,
+          voter.city,
+          voter.boothAddress,
+          voter.boothNo?.toString(),
+          voter.gender,
+          voter.age?.toString(),
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        if (!haystack.includes(search)) return false;
+      }
+    if (filters.ageMin && voter.age < parseInt(filters.ageMin)) return false;
+      if (filters.ageMax && voter.age > parseInt(filters.ageMax)) return false;
+      if (filters.gender && filters.gender !== 'all' && voter.gender !== filters.gender) return false;
+      if (filters.boothNo && voter.boothNo !== parseInt(filters.boothNo)) return false;
+      if (filters.city && filters.city !== 'all' && voter.city !== filters.city) return false;
+      if (filters.houseNo && !voter.houseNo.toLowerCase().includes(filters.houseNo.toLowerCase())) return false;
+      if (filters.relatedTo && !voter.relatedTo.toLowerCase().includes(filters.relatedTo.toLowerCase())) return false;
+      if (filters.mobileAvailable && !voter.mobile) return false;
+      if (filters.printEnabled && !voter.isPrint) return false;
+      return true;
+    });
+  }, [filters, voterData]);
 
   const handlegroupPrint = () => {
   if (!selectedHouse) return;
@@ -471,8 +398,6 @@ const VoterList = () => {
     }
   };
 
-  const groups = groupByHouseNumber(mockVoterData);
-
   const handleGroupByClick = (houseNumber: string) => {
     setSelectedHouse(houseNumber);
     setOpen(true);
@@ -483,6 +408,45 @@ const VoterList = () => {
       <div className="w-full">
         {/* Voter Records List */}
         <div className="w-full">
+                        {/* Filter Dialog */}
+      <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Filter Users</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              name="name"
+              placeholder="Name"
+              value={filterFields.name}
+              onChange={handleFilterChange}
+            />
+            <Input
+              name="houseNo"
+              placeholder="House Number"
+              value={filterFields.houseNo}
+              onChange={handleFilterChange}
+            />
+            <Input
+              name="voterIdNumber"
+              placeholder="Voter ID Card"
+              value={filterFields.voterIdNumber}
+              onChange={handleFilterChange}
+            />
+               <Input
+              name="relatedTo"
+              placeholder="Related To"
+              value={filterFields.relatedTo}
+              onChange={handleFilterChange}
+            />
+          </div>
+          <DialogFooter>
+            <Button onClick={handleApplyFilters} type="button">
+              Apply
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 mb-4">
@@ -507,6 +471,13 @@ const VoterList = () => {
                   {/* {loading ? "Searching..." : "Search"} */}
                   Search
                 </Button>
+                <Button
+          type="button"
+          variant="outline"
+          onClick={() => setFilterOpen(true)}
+        >
+          Filters
+        </Button>
               </div>
             </CardHeader>
             <CardContent>
