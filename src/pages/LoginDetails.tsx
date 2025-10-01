@@ -4,6 +4,14 @@ import { Shield, Clock, MapPin, Smartphone, Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DetailPageLayout from "@/components/layout/DetailPageLayout";
 import { apiRequest } from "@/lib/utils";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 interface LoginDetail {
   id: string;
@@ -83,77 +91,74 @@ const LoginDetails = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {loginDetails?.print?.map((detail, index) => (
-            <Card key={index} className="border-civic-primary/30 hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Activity className="h-5 w-5 text-civic-primary" />
-                  User Session
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Smartphone className="h-4 w-4 text-civic-secondary" />
-                  <div>
-                    <p className="text-sm font-medium">Username</p>
-                    <p className="text-xs text-muted-foreground">{detail.votername || "Unknown"}</p>
+       <div className="overflow-x-auto">
+      <div className="inline-block min-w-full align-middle">
+        <div className="rounded-xl border bg-white shadow-md">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>
+                  <div className="flex items-center gap-2">
+                    <Activity className="h-4 w-4 text-civic-primary" />
+                    Username
                   </div>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-civic-secondary" />
-                  <div>
-                    <p className="text-sm font-medium">Voter ID</p>
-                    <p className="text-xs text-muted-foreground">{detail.voteridnumber || "127.0.0.1"}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Smartphone className="h-4 w-4 text-civic-secondary" />
-                  <div>
-                    <p className="text-sm font-medium">Device</p>
-                    <p className="text-xs text-muted-foreground">{detail.device || "Mobile App"}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-civic-secondary" />
-                  <div>
-                    <p className="text-sm font-medium">Login Time</p>
-                    <p className="text-xs text-muted-foreground">
-                      {detail.timestamp ? new Date(detail.timestamp).toLocaleString() : "Recent"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-civic-secondary" />
-                  <div>
-                    <p className="text-sm font-medium">Status</p>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      detail.status === "Success" 
-                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" 
-                        : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                    }`}>
-                      {detail.status || "Success"}
-                    </span>
-                  </div>
-                </div>
-
-                {detail.location && (
+                </TableHead>
+                <TableHead>
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-civic-secondary" />
-                    <div>
-                      <p className="text-sm font-medium">Location</p>
-                      <p className="text-xs text-muted-foreground">{detail.location}</p>
-                    </div>
+                    Voter ID
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                </TableHead>
+                <TableHead>
+                  <div className="flex items-center gap-2">
+                    <Smartphone className="h-4 w-4 text-civic-secondary" />
+                    Device
+                  </div>
+                </TableHead>
+                <TableHead>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-civic-secondary" />
+                    Login Time
+                  </div>
+                </TableHead>
+                <TableHead>
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-civic-secondary" />
+                    Status
+                  </div>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+
+        <TableBody>
+          {loginDetails?.print?.map((detail, index) => (
+            <TableRow key={index} className="hover:bg-gray-50 transition">
+              <TableCell className="font-medium">{detail.votername || "Unknown"}</TableCell>
+              <TableCell>{detail.voteridnumber || "N/A"}</TableCell>
+              <TableCell>{detail.device || "Mobile App"}</TableCell>
+              <TableCell>
+                {detail.timestamp
+                  ? new Date(detail.timestamp).toLocaleString()
+                  : "Recent"}
+              </TableCell>
+              <TableCell>
+                <span
+                  className={`text-xs px-2 py-1 rounded-full ${
+                    detail.status === "Success"
+                      ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                      :"bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                  }`}
+                >
+                  {detail.status || "Success"}
+                </span>
+              </TableCell>
+            </TableRow>
           ))}
-        </div>
+        </TableBody>
+      </Table>
+    </div>
+    </div>
+    </div>
       )}
     </DetailPageLayout>
   );

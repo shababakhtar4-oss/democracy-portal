@@ -43,18 +43,25 @@ const Dashboard = () => {
       progressColor: "hsl(254 73% 58%)",
     },
     {
-      title: "Total Records", 
-      value: "50,000+",
-      subtitle: "Overview of Last month",
+      title: "State Name", 
+      value: userData?.stateName || "Delhi",
+      subtitle: "State of the assembly",
       progress: 500,
       progressColor: "hsl(168 76% 42%)",
     },
     {
       title: "Constituency Name",
-      value: "Okhla",
+      value: userData?.areaName || "New Delhi",
       subtitle: "Constituency declared as per ECI data",
       progress: 1000,
       progressColor: "hsl(197 71% 73%)",
+    },
+    {
+      title: "Party Name",
+      value: userData?.partyName || "BJP",
+      subtitle: "Party name declared as per ECI data",
+      progress: 200,
+      progressColor: "hsla(199, 19%, 19%, 1.00)",
     },
   ];
 
@@ -90,8 +97,8 @@ const Dashboard = () => {
       textColor: "text-teal-900",
     },
     {
-      title: "Voter Reports",
-      description: "Generate and view voter reports",
+      title: "Users Report",
+      description: "Generate and view user reports",
       icon: BarChart3,
       path: "/voter-report",
       cardClass: "dashboard-card-purple",
@@ -127,7 +134,12 @@ const Dashboard = () => {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const userData = localStorage.getItem("user");
+  const activationCode = userData ? JSON.parse(userData).activationCode : "";
   const token = userData ? JSON.parse(userData).token : null;
+  const areaName = userData ? JSON.parse(userData).areaName : "Area 51";
+  const stateName = userData ? JSON.parse(userData).stateName : "Delhi";
+  const partyName = userData ? JSON.parse(userData).partyName : "BJP";
+  const candidateName = userData ? JSON.parse(userData).username : "Faizan";
   // const token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0Iiwicm9sZXMiOlsiUk9MRV9DQU5ESURBVEVfQURNSU4iXSwiaWF0IjoxNzU4NzA5NzQ2LCJleHAiOjE3NTg3MTMzNDZ9.Pf2aJXR0LcaUSnjKmY8RxevO7d8UFA8hBuIt6-meu-o";
   const file = e.target.files?.[0];
   if (!file) return;
@@ -136,10 +148,11 @@ const Dashboard = () => {
   try {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("partyName", "BJP");
-    formData.append("candidateName", "Faizan");
-    formData.append("areaName", "Area 51");
-    formData.append("stateName", "Delhi");
+    formData.append("partyName", partyName);
+    formData.append("candidateName", candidateName);
+    formData.append("areaName", areaName);
+    formData.append("stateName", stateName);
+    formData.append("activationCode", activationCode);
 
     // Replace with your actual API endpoint
     const response = await fetch(
@@ -184,7 +197,7 @@ const Dashboard = () => {
 
       <main className="container mx-auto px-8 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           {statCards.map((stat) => (
             <StatCard
               key={stat.title}

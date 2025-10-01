@@ -94,10 +94,9 @@ const VoterList = () => {
       const token = userData ? JSON.parse(userData).token : null;
       // Replace with your actual API endpoint
       const response = await apiRequest<any>(
-        `https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/api/voters/search?activationCode=${userData ? JSON.parse(userData).activationCode : null}`,
+        `https://pollingservice-addeehfvcxafffb5.centralindia-01.azurewebsites.net/api/voters/search?searchText=${filters?.name}&activationCode=${userData ? JSON.parse(userData).activationCode : null}`,
         {
-          method: "POST",
-          body: JSON.stringify({ name: filters.name,activationCode: userData ? JSON.parse(userData).activationCode : null }),
+          method: "GET",
           headers: token
             ? {
                 Authorization: `Bearer ${token}`,
@@ -471,13 +470,13 @@ const VoterList = () => {
                   {/* {loading ? "Searching..." : "Search"} */}
                   Search
                 </Button>
-                <Button
+                {/* <Button
           type="button"
           variant="outline"
           onClick={() => setFilterOpen(true)}
         >
           Filters
-        </Button>
+        </Button> */}
               </div>
             </CardHeader>
             <CardContent>
