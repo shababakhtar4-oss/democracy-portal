@@ -189,171 +189,33 @@ const VoterList = () => {
     printWindow.document.write(`
       <html>
         <head>
-          <title>Voters in House No: ${selectedHouse}</title>
+          <title>Voter Details</title>
           <style>
-            body { 
-              font-family: Arial, sans-serif; 
-              padding: 20px; 
-              line-height: 1.4;
-              background-color: #f8f9fa;
-            }
-            h2 { 
-              text-align: center; 
-              color: #333;
-              margin-bottom: 30px;
-              padding-bottom: 10px;
-              border-bottom: 2px solid #007bff;
-            }
-            .voter-card {
-              background: white;
-              border-radius: 8px;
-              padding: 20px;
-              margin-bottom: 20px;
-              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-              border-left: 4px solid #007bff;
-            }
-            .voter-header {
-              background: linear-gradient(135deg, #007bff, #6610f2);
-              color: white;
-              padding: 15px;
-              border-radius: 6px;
-              margin-bottom: 15px;
-            }
-            .voter-name {
-              font-size: 18px;
-              font-weight: bold;
-              margin: 0;
-            }
-            .voter-details {
-              font-size: 14px;
-              opacity: 0.9;
-            }
-            .info-grid {
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: 15px;
-              margin-bottom: 15px;
-            }
-            .info-item {
-              background: #f8f9fa;
-              padding: 12px;
-              border-radius: 6px;
-              border-left: 3px solid #28a745;
-            }
-            .info-label {
-              font-size: 11px;
-              font-weight: bold;
-              color: #666;
-              text-transform: uppercase;
-              margin-bottom: 4px;
-            }
-            .info-value {
-              font-size: 14px;
-              color: #333;
-              font-weight: 600;
-            }
-            .voter-id {
-              background: #e3f2fd;
-              border: 1px solid #2196f3;
-              padding: 12px;
-              border-radius: 6px;
-              margin-bottom: 15px;
-              text-align: center;
-            }
-            .voter-id-label {
-              font-size: 12px;
-              color: #1976d2;
-              font-weight: bold;
-              margin-bottom: 4px;
-            }
-            .voter-id-value {
-              font-size: 16px;
-              color: #0d47a1;
-              font-weight: bold;
-            }
-            .booth-address {
-              background: #fff3e0;
-              border: 1px solid #ff9800;
-              padding: 12px;
-              border-radius: 6px;
-              margin-top: 15px;
-            }
-            .booth-label {
-              font-size: 11px;
-              color: #f57c00;
-              font-weight: bold;
-              margin-bottom: 6px;
-            }
-            .booth-text {
-              font-size: 13px;
-              color: #e65100;
-              line-height: 1.4;
-            }
-            .mobile-info {
-              background: #f3e5f5;
-              border: 1px solid #9c27b0;
-              padding: 12px;
-              border-radius: 6px;
-              text-align: center;
-            }
-            .no-mobile {
-              background: #fafafa;
-              border: 1px solid #bdbdbd;
-              color: #757575;
-            }
-            @media print {
-              .voter-card {
-                page-break-inside: avoid;
-                margin-bottom: 30px;
-              }
-            }
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            .card { border: 1px solid #ddd; border-radius: 10px; padding: 20px; max-width: 400px; margin: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+            .card h3 { margin-top: 0; color: #2c3e50; }
+            .card p { margin: 6px 0; font-size: 14px; }
+            .card b { color: #34495e; }
           </style>
         </head>
         <body>
           <h2>Voters in House No: ${selectedHouse}</h2>
           ${voters
             .map(
-              v =>
-                `<div class="voter-card">
-                  <div class="voter-header">
-                    <div class="voter-name">${v.name}</div>
-                    <div class="voter-details">${v.gender} • ${v.age} years old</div>
-                  </div>
-                  
-                  <div class="voter-id">
-                    <div class="voter-id-label">VOTER ID NUMBER</div>
-                    <div class="voter-id-value">${v.voterIdNumber}</div>
-                  </div>
-                  
-                  <div class="info-grid">
-                    <div class="info-item">
-                      <div class="info-label">Related To</div>
-                      <div class="info-value">${v.relatedTo}</div>
-                    </div>
-                    <div class="info-item">
-                      <div class="info-label">House No</div>
-                      <div class="info-value">${v.houseNo || 'Not Available'}</div>
-                    </div>
-                    <div class="info-item">
-                      <div class="info-label">City</div>
-                      <div class="info-value">${v.city}</div>
-                    </div>
-                    <div class="info-item">
-                      <div class="info-label">Booth No</div>
-                      <div class="info-value">${v.boothNo}</div>
-                    </div>
-                  </div>
-                  
-                  <div class="mobile-info ${v.mobile ? '' : 'no-mobile'}">
-                    <div class="info-label">Mobile Number</div>
-                    <div class="info-value">${v.mobile || 'Not Available'}</div>
-                  </div>
-                  
-                  <div class="booth-address">
-                    <div class="booth-label">Booth Address</div>
-                    <div class="booth-text">${v.boothAddress}</div>
-                  </div>
-                </div>`
+              item =>
+                `<div class="card">
+            <h3>Voter Details</h3>
+            <p><b>Name:</b> ${item.name}</p>
+            <p><b>Father/Husband:</b> ${item.rlnName} (${item.rlnType})</p>
+            <p><b>House No:</b> ${item.houseNo}</p>
+            <p><b>AC No:</b> ${item.acNo}, <b>Part No:</b> ${item.partNo}, <b>Section No:</b> ${item.sectionNo}</p>
+            <p><b>Sl No:</b> ${item.slNoInPart}</p>
+            <p><b>EPIC No:</b> ${item.epicNo}</p>
+            <p><b>Gender:</b> ${item.gender}</p>
+            <p><b>Age:</b> ${item.age}</p>
+            <p><b>DOB:</b> ${item.dob || "-"}</p>
+            <p><b>Mobile No:</b> ${item.mobileNo || "-"}</p>
+          </div>`
             )
             .join("")}
         </body>
@@ -364,33 +226,37 @@ const VoterList = () => {
   }
 };
 
-  const handlePrint = (voter: VoterRecord) => {
+  const handlePrint = (item: VoterRecord) => {
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`
         <html>
-          <head>
-            <title>Voter Record - ${voter.name}</title>
-            <style>
-              body { font-family: Arial, sans-serif; padding: 20px; }
-              .header { text-align: center; margin-bottom: 30px; }
-              .field { margin: 10px 0; }
-              .label { font-weight: bold; }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <h2>Voter Record</h2>
-            </div>
-            <div class="field"><span class="label">Name:</span> ${voter.name} (${voter.gender}, ${voter.age})</div>
-            <div class="field"><span class="label">Voter ID:</span> ${voter.voterIdNumber}</div>
-            <div class="field"><span class="label">Related To:</span> ${voter.relatedTo}</div>
-            <div class="field"><span class="label">House No:</span> ${voter.houseNo || '(blank)'}</div>
-            <div class="field"><span class="label">City:</span> ${voter.city}</div>
-            <div class="field"><span class="label">Booth:</span> ${voter.boothAddress}</div>
-            <div class="field"><span class="label">Mobile:</span> ${voter.mobile || 'Not available'}</div>
-          </body>
-        </html>
+        <head>
+          <title>Voter Details</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            .card { border: 1px solid #ddd; border-radius: 10px; padding: 20px; max-width: 400px; margin: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+            .card h3 { margin-top: 0; color: #2c3e50; }
+            .card p { margin: 6px 0; font-size: 14px; }
+            .card b { color: #34495e; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <h3>Voter Details</h3>
+            <p><b>Name:</b> ${item.name}</p>
+            <p><b>Father/Husband:</b> ${item.rlnName} (${item.rlnType})</p>
+            <p><b>House No:</b> ${item.houseNo}</p>
+            <p><b>AC No:</b> ${item.acNo}, <b>Part No:</b> ${item.partNo}, <b>Section No:</b> ${item.sectionNo}</p>
+            <p><b>Sl No:</b> ${item.slNoInPart}</p>
+            <p><b>EPIC No:</b> ${item.epicNo}</p>
+            <p><b>Gender:</b> ${item.gender}</p>
+            <p><b>Age:</b> ${item.age}</p>
+            <p><b>DOB:</b> ${item.dob || "-"}</p>
+            <p><b>Mobile No:</b> ${item.mobileNo || "-"}</p>
+          </div>
+        </body>
+      </html>
       `);
       printWindow.document.close();
       printWindow.print();
@@ -512,14 +378,14 @@ const VoterList = () => {
                         {/* Voter ID - Prominent display */}
                         <div className="bg-gray-50 rounded-lg p-3 border-l-4 border-blue-500">
                           <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">Voter ID</p>
-                          <p className="text-sm font-bold text-gray-900">{voter.voterIdNumber}</p>
+                          <p className="text-sm font-bold text-gray-900">{voter.epicNo}</p>
                         </div>
 
                         {/* Personal Details */}
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <p className="text-xs text-gray-500 font-medium">Related To</p>
-                            <p className="text-sm font-semibold text-gray-800 capitalize">{voter.relatedTo}</p>
+                            <p className="text-sm font-semibold text-gray-800 capitalize">{voter.rlnName}</p>
                           </div>
                           <div>
                             <p className="text-xs text-gray-500 font-medium">House No</p>
@@ -531,22 +397,22 @@ const VoterList = () => {
                         <div>
                           <p className="text-xs text-gray-500 font-medium mb-1">Location</p>
                           <div className="bg-green-50 rounded-lg p-2 border border-green-200">
-                            <p className="text-xs font-semibold text-green-800">{voter.city}</p>
+                            <p className="text-xs font-semibold text-green-800">{voter.partNo}</p>
                           </div>
                         </div>
 
                         {/* Contact Info */}
-                        {voter.mobile && (
+                        {voter?.mobileNo && (
                           <div className="flex items-center gap-2 bg-orange-50 rounded-lg p-2 border border-orange-200">
                             <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                             <div>
                               <p className="text-xs text-orange-700 font-medium">Mobile</p>
-                              <p className="text-sm font-semibold text-orange-800">{voter.mobile}</p>
+                              <p className="text-sm font-semibold text-orange-800">{voter?.mobileNo?.slice(-4).padStart(voter?.mobileNo?.length, '*')}</p>
                             </div>
                           </div>
                         )}
                         
-                        {!voter.mobile && (
+                        {!voter?.mobileNo && (
                           <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
                             <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                             <p className="text-xs text-gray-500">No mobile number</p>

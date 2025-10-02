@@ -6,10 +6,12 @@ import {
   Clock,
   UploadCloud,
   BarChart3,
+  MessageCircle, Send, X, bot, Printer
 } from "lucide-react";
 import SimpleHeader from "@/components/layout/SimpleHeader";
 import StatCard from "@/components/dashboard/StatCard";
 import { toast } from "@/components/ui/use-toast";
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 
 interface User {
   name: string;
@@ -22,6 +24,40 @@ const Dashboard = () => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
+    const [isChatOpen, setIsChatOpen] = useState(false)
+    const [messages, setMessages] = useState([]);
+  // const [messages, setMessages] = useState([
+  //   { sender: "bot", text: "👋 Hi! How can I help you today?" },
+  // ])
+
+  const [botData, setBotData] = useState<any[]>([]);
+  const [input, setInput] = useState("")
+   const userData = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") as string) : null;
+
+  const handleSend = async () => {
+    if (!input.trim()) return
+    // Call chatbot service API (replace with your backend endpoint)
+    try {
+      const res = await fetch(`https://ai-voter-chat-d2gxaheja5fkhbbr.centralindia-01.azurewebsites.net/chat/query?activationCode=${userData?.activationCode}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: input }),
+      })
+            const data = await res.json()
+            const list = data?.results || data || [];
+      setBotData(data);
+      setMessages((prev) => [
+        ...prev,
+        { sender: "user", text: input },
+        { sender: "bot", list }
+      ]);
+
+    } catch (err) {
+      console.error("API error:", error);
+    }
+
+    setInput("")
+  }
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -32,7 +68,45 @@ const Dashboard = () => {
     setUser(JSON.parse(storedUser));
   }, [navigate]);
 
-  const userData = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") as string) : null;
+
+  const handlePrint = (item) => {
+    const printContent = `
+     <html>
+        <head>
+          <title>Voter Details</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            .card { border: 1px solid #ddd; border-radius: 10px; padding: 20px; max-width: 400px; margin: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+            .card h3 { margin-top: 0; color: #2c3e50; }
+            .card p { margin: 6px 0; font-size: 14px; }
+            .card b { color: #34495e; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <h3>Voter Details</h3>
+            <p><b>Name:</b> ${item.name}</p>
+            <p><b>Father/Husband:</b> ${item.rlnName} (${item.rlnType})</p>
+            <p><b>House No:</b> ${item.houseNo}</p>
+            <p><b>AC No:</b> ${item.acNo}, <b>Part No:</b> ${item.partNo}, <b>Section No:</b> ${item.sectionNo}</p>
+            <p><b>Sl No:</b> ${item.slNoInPart}</p>
+            <p><b>EPIC No:</b> ${item.epicNo}</p>
+            <p><b>Gender:</b> ${item.gender}</p>
+            <p><b>Age:</b> ${item.age}</p>
+            <p><b>DOB:</b> ${item.dob || "-"}</p>
+            <p><b>Mobile No:</b> ${item.mobileNo || "-"}</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const newWindow = window.open('', '_blank');
+    newWindow.document.write(printContent);
+    newWindow.document.close();
+    newWindow.print();
+  };
+
+ 
 
   const statCards = [
     {
@@ -101,6 +175,16 @@ const Dashboard = () => {
       description: "Generate and view user reports",
       icon: BarChart3,
       path: "/voter-report",
+      cardClass: "dashboard-card-purple",
+      iconBg: "bg-purple-600/80",
+      iconColor: "text-white",
+      textColor: "text-white",
+    },
+    {
+      title: "campaign",
+      description: "Create and manage campaigns messages",
+      icon: BarChart3,
+      path: "/campaign",
       cardClass: "dashboard-card-purple",
       iconBg: "bg-purple-600/80",
       iconColor: "text-white",
@@ -191,6 +275,8 @@ const Dashboard = () => {
     return null; // Loading state
   }
 
+  const handleToggle = () => setIsChatOpen(!isChatOpen);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <SimpleHeader user={user} />
@@ -213,7 +299,7 @@ const Dashboard = () => {
 
         {/* Action Grids */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Navigation Grid - 2x2 */}
+          {/* Navigation Grid */}
           <div className="lg:col-span-2">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {navigationItems.map((item) => (
@@ -272,6 +358,89 @@ const Dashboard = () => {
           onChange={handleFileChange}
         />
       </main>
+
+      {/* Floating Chat Button */}
+      {!isChatOpen && (
+          <button
+            onClick={handleToggle}
+            className="fixed bottom-6 right-6 flex items-center gap-2 px-5 py-3 rounded-full bg-purple-600 text-white shadow-lg hover:bg-purple-700 transition z-50"
+          >
+            <MessageCircle className="h-6 w-6" />
+            <span className="font-medium">Chat with AI</span>
+          </button>
+      )}
+
+      {/* Chat Popup */}
+      {isChatOpen && (
+        <div className="fixed bottom-16 right-5 w-96 h-[500px] bg-white shadow-xl border rounded-lg flex flex-col z-50">
+                 <div className="flex justify-between items-center p-2 font-bold bg-purple-700 text-white rounded-t-lg">
+            <span>ChatBot</span>
+            <button onClick={handleToggle} className="p-1 hover:bg-blue-700 rounded">
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-2 space-y-3">
+            {messages.map((msg, i) => (
+              <div key={i}>
+                {msg.sender === "user" && (
+                  <div className="bg-blue-100 p-2 rounded-lg text-right">
+                    {msg.text}
+                  </div>
+                )}
+
+                {msg.sender === "bot" && (
+                  <div className="space-y-2">
+                    {msg.list && msg.list.length > 0 ? (
+                      msg.list.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="border rounded-lg shadow-sm p-3 space-y-1 bg-gray-50"
+                        >
+                          <p><b>{item.name}</b> ({item.gender}, {item.age})</p>
+                          <p>EPIC: {item.epicNo}</p>
+                          <p>Father/Husband: {item.rlnName}</p>
+                          <p>House No: {item.houseNo}</p>
+
+                          <button
+                            onClick={() => handlePrint(item)}
+                            className="mt-2 bg-green-600 text-white px-3 py-1 rounded text-sm"
+                          >
+                            Print
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="bg-gray-100 p-2 rounded">
+                        No results found
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Input */}
+          <div className="p-3 border-t flex items-center gap-2">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type a message..."
+              className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring focus:ring-purple-400"
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            />
+            <button
+              onClick={handleSend}
+              className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            >
+              <Send className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -18,6 +18,7 @@ interface HeaderProps {
 const Header = ({ user }: HeaderProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const userData = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") as string) : null;
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -45,7 +46,7 @@ const Header = ({ user }: HeaderProps) => {
           {/* User Profile Section */}
           <div className="flex items-center space-x-4">
             <div className="text-right hidden md:block">
-              <p className="text-white font-medium">{user.name}</p>
+              <p className="text-white font-medium">{userData?.username}</p>
               <p className="text-blue-100 text-sm">{user.email}</p>
             </div>
             
@@ -55,7 +56,7 @@ const Header = ({ user }: HeaderProps) => {
                   <Avatar className="h-10 w-10 border-2 border-white/20">
                     <AvatarImage src={user.avatar || defaultAvatar} alt={user.name} />
                     <AvatarFallback className="bg-civic-primary text-white">
-                      {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                      {userData?.username.split(' ').map(n => n[0]).join('').toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 </Button>

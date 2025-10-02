@@ -14,8 +14,11 @@ import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
 import RecentLogins from "./pages/RecentLogins";
 import LoginDetails from "./pages/LoginDetails";
+import Campaign from "./pages/Campaign";
 
 const queryClient = new QueryClient();
+
+
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -36,6 +39,7 @@ const App = () => (
           <Route path="/recent-login/:id" element={<LoginDetails />} />
           <Route path="/activation-code" element={<Index />} />
           <Route path="/booth-committee" element={<Index />} />
+          <Route path="/campaign" element={<Campaign />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

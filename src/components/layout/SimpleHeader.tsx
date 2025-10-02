@@ -33,7 +33,7 @@ const SimpleHeader = ({ user }: SimpleHeaderProps) => {
         <h1 className="text-4xl font-bold text-white">Chunav</h1>
         
         <div className="flex items-center space-x-4">
-          <span className="text-white font-medium">{user.name}</span>
+          <span className="text-white font-medium">{userData?.username}</span>
           <Avatar className="h-12 w-12 border-2 border-white/30">
             <AvatarImage 
               src={user.avatar || defaultAvatar} 
@@ -41,7 +41,7 @@ const SimpleHeader = ({ user }: SimpleHeaderProps) => {
               className="object-cover"
             />
             <AvatarFallback className="bg-white text-purple-600 font-bold">
-              {user.name?.charAt(0) || '?'}
+              {userData.username?.charAt(0) || '?'}
             </AvatarFallback>
           </Avatar>
           <Button 
