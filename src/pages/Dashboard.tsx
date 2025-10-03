@@ -34,6 +34,25 @@ const Dashboard = () => {
   const [input, setInput] = useState("")
    const userData = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") as string) : null;
 
+     useEffect(() => {
+    // 5 hours in milliseconds
+    const timeout = 5 * 60 * 60 * 1000; 
+    // autologout after 5 minutes of inactivity
+    // const timeout = 1 * 60 * 1000;
+
+    const timer = setTimeout(() => {
+      // Clear session (adjust to your auth storage)
+      localStorage.removeItem("user");
+      sessionStorage.clear();
+
+      // Redirect to login
+      navigate("/", { replace: true });
+    }, timeout);
+
+    return () => clearTimeout(timer); // cleanup on unmount
+  }, [navigate]);
+
+
   const handleSend = async () => {
     if (!input.trim()) return
     // Call chatbot service API (replace with your backend endpoint)
@@ -180,16 +199,16 @@ const Dashboard = () => {
       iconColor: "text-white",
       textColor: "text-white",
     },
-    {
-      title: "campaign",
-      description: "Create and manage campaigns messages",
-      icon: BarChart3,
-      path: "/campaign",
-      cardClass: "dashboard-card-purple",
-      iconBg: "bg-purple-600/80",
-      iconColor: "text-white",
-      textColor: "text-white",
-    },
+    // {
+    //   title: "campaign",
+    //   description: "Create and manage campaigns messages",
+    //   icon: BarChart3,
+    //   path: "/campaign",
+    //   cardClass: "dashboard-card-purple",
+    //   iconBg: "bg-purple-600/80",
+    //   iconColor: "text-white",
+    //   textColor: "text-white",
+    // },
   ];
 
   const uploadItem = {
